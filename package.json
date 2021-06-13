@@ -1,0 +1,27 @@
+{
+  "name": "letsmove",
+  "version": "1.0.0",
+  "description": "A simple exercise game based on MoveNet pose detection",
+  "main": "bundle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack serve --open --config webpack.dev.js",
+    "build": "webpack serve --config webpack.prod.js"
+  },
+  "author": "Jacky Baltes <jacky.baltes@ntnu.edu.tw>",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow-models/pose-detection": "^0.0.3",
+    "phaser": "^3.55.2"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^4.0.0-alpha.0",
+    "copy-webpack-plugin": "^9.0.0",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.2",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.8.0"
+  }
+}
