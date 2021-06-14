@@ -30,9 +30,12 @@ function main() {
                     console.log("draw context");
                     //camera.drawContext( );
                     const poses = jbpose.getPoses().then( (poses) => {
-                        console.log(poses[0].keypoints)
+                        //console.log(poses[0].keypoints);
+                        camera.clearContext();
+                        camera.drawContext();
+                        jbpose.drawResults( poses, camera.context );
                     });
-                }, 100 );
+                }, 30 );
             }
         );    
     });
