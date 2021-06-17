@@ -1,26 +1,37 @@
 //import * as poseDetection from '@tensorflow-models/pose-detection';
 
-export type CameraParam = {
+export type JBCameraParam = {
     'targetFPS' : number;
     'sizeOption' : string;
 }
 
-export class Camera {
+export class JBCamera {
     videoId : string;
-    outputId : string;
-    context : CanvasRenderingContext2D;
     canvas : HTMLCanvasElement;
     video : HTMLVideoElement;
 
-    private constructor( id: string, outId : string ) {
+    private constructor( id: string ) {
         this.videoId = id;
-        this.outputId = outId;
         this.video = document.getElementById( id ) as HTMLVideoElement;
-        this.canvas = document.getElementById( outId ) as HTMLCanvasElement;
-        this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     }
 
-    static async factory( videoId : string, outputId : string , cameraParam : CameraParam ) {
+    drawContext( ctx : CanvasRenderingContext2D ) {
+        console.log(`JBCamera.drawImage ${this.video.videoWidth}, ${this.video.videoHeight}`);
+        ctx.drawImage( this.video, 0, 0, this.video.videoWidth, this.video.videoHeight );
+    }
+
+    clearContext( ctx : CanvasRenderingContext2D ) {
+        ctx.fillStyle = this.randomRGBA();
+        console.log(`JBCamera.clearContext ${this.video.videoWidth}, ${this.video.videoHeight}`);
+        ctx.clearRect(0, 0, this.video.videoWidth, this.video.videoHeight);
+    }
+
+    randomRGBA() {
+        let o = Math.round, r = Math.random, s = 255;
+        return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
+    }
+
+    static async factory( videoId : string, cameraParam : JBCameraParam ) {
         if ( ( ! navigator.mediaDevices ) || ( ! navigator.mediaDevices.getUserMedia ) ) {
             throw new Error("No video camera available");
         }
@@ -39,7 +50,7 @@ export class Camera {
         };
 
         const stream = await navigator.mediaDevices.getUserMedia( videoConfig );
-        const camera = new Camera( videoId, outputId );
+        const camera = new JBCamera( videoId );
         camera.video.srcObject = stream;
         await new Promise( resolve => {
             camera.video.onloadedmetadata = () => {
@@ -53,21 +64,13 @@ export class Camera {
         camera.video.width = videoWidth;
         camera.video.height = videoHeight;
 
-        camera.canvas.width = videoWidth;
-        camera.canvas.height = videoHeight;
-        const canvasContainer = document.querySelector(".canvas-wrapper") as HTMLDivElement;
-        canvasContainer!.setAttribute( 'style', `width: ${videoWidth}px; height: ${videoHeight}px` );
-        camera.context.translate( camera.video.videoWidth, 0 );
-        camera.context.scale(-1,1);
+        // camera.canvas.width = videoWidth;
+        // camera.canvas.height = videoHeight;
+        // const canvasContainer = document.querySelector(".canvas-wrapper") as HTMLDivElement;
+        // canvasContainer!.setAttribute( 'style', `width: ${videoWidth}px; height: ${videoHeight}px` );
+        // camera.context.translate( camera.video.videoWidth, 0 );
+        // camera.context.scale(-1,1);
 
         return camera;
     }
-
-    drawContext( ) {
-        this.context.drawImage( this.video, 0, 0, this.video.videoWidth, this.video.videoHeight );
-    }
-
-    clearContext( ) {
-        this.context.clearRect( 0, 0, this.video.videoWidth, this.video.videoHeight );
-    }    
 }

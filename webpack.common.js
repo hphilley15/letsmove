@@ -27,7 +27,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: 'index.html', context: 'src/' },
-        { from: 'images/*', context: 'src/' },
+        { from: 'assets/images/*', context: 'src/' },
       ],
     }),
   ],
