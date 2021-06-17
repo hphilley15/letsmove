@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --open --config webpack.dev.js",
-    "build": "webpack serve --config webpack.prod.js"
+    "build": "webpack serve --config webpack.prod.js",
+    "gh-pages" : "gh-pages -d dist -b gh-pages"
   },
   "author": "Jacky Baltes <jacky.baltes@ntnu.edu.tw>",
   "license": "ISC",
