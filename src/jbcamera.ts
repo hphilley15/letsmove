@@ -15,21 +15,21 @@ export class JBCamera {
         this.video = document.getElementById( id ) as HTMLVideoElement;
     }
 
-    drawContext( ctx : CanvasRenderingContext2D ) {
-        console.log(`JBCamera.drawImage ${this.video.videoWidth}, ${this.video.videoHeight}`);
-        ctx.drawImage( this.video, 0, 0, this.video.videoWidth, this.video.videoHeight );
+    drawContext( ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number  ) {
+        console.log(`JBCamera.drawImage ${width}, ${height}`);
+        ctx.drawImage( this.video, x, y, width, height );
     }
 
-    clearContext( ctx : CanvasRenderingContext2D ) {
-        ctx.fillStyle = this.randomRGBA();
-        console.log(`JBCamera.clearContext ${this.video.videoWidth}, ${this.video.videoHeight}`);
-        ctx.clearRect(0, 0, this.video.videoWidth, this.video.videoHeight);
+    clearContext( ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, color : string ) {
+        ctx.fillStyle = color;
+        console.log(`JBCamera.clearContext ${ctx} ${width}, ${height}`);
+        ctx.fillRect( x, y,width, height );
     }
 
-    randomRGBA() {
-        let o = Math.round, r = Math.random, s = 255;
-        return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
-    }
+    // randomRGBA() {
+    //     let o = Math.round, r = Math.random, s = 255;
+    //     return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
+    // }
 
     static async factory( videoId : string, cameraParam : JBCameraParam ) {
         if ( ( ! navigator.mediaDevices ) || ( ! navigator.mediaDevices.getUserMedia ) ) {

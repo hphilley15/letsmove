@@ -31,7 +31,7 @@ class PreLoader extends Phaser.Scene{
         this.percentText.destroy();
         this.assetText.destroy();
 
-        this.scene.start( 'MainScreen' );
+        this.scene.start( 'main_screen' );
        });
     };
 
