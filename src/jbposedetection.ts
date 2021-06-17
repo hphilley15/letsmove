@@ -24,6 +24,7 @@ export class JBPoseDetection {
     }
 
     drawResults( poses, context : CanvasRenderingContext2D ) {
+        
         for (const pose of poses) {
           this.drawResult(pose, context );
         }

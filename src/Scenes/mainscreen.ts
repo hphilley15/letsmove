@@ -41,13 +41,18 @@ export default class MainScreen extends Phaser.Scene
         let height = this.cameras.main.height;
         console.log( `create: ${width} ${height}`);
 
-        this.canvas = this.textures.createCanvas( 'webcam', width, height );
-        this.add.image( 400, 300, 'webcam');
+        this.canvas = this.textures.createCanvas( 'webcam', 360, 240 );
+        const ctx = this.canvas.context;
+
+        // ctx.translate(0, this.canvas.width);
+        //ctx.scale(-1,1);
+
+        this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( 800/this.canvas.width, 600/this.canvas.height );
 
         this.loadingText = this.make.text({
             x: width / 2,
             y: height / 2 - 50,
-            text: 'Main Screen Message',
+            text: 'Main Screen',
             style: {
                 color: '#a0b030',
                 font: '32px monospace',
