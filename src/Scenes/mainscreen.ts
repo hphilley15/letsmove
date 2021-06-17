@@ -2,6 +2,7 @@ import { PoseDetector } from '@tensorflow-models/pose-detection';
 import * as Phaser from 'phaser';
 import {JBCamera, JBCameraParam } from "../jbcamera";
 import { JBPoseDetection } from "../jbposedetection";
+import JBTarget from '../jbtarget';
 
 export default class MainScreen extends Phaser.Scene
 {
@@ -23,7 +24,7 @@ export default class MainScreen extends Phaser.Scene
                     ideal: 30
                 }
             }
-        };
+        }; 
 
         // const stream = navigator.mediaDevices.getUserMedia( videoConfig ).then( (stream) => {
         //     this.stream = stream;
@@ -32,9 +33,12 @@ export default class MainScreen extends Phaser.Scene
 
     preload() {
         this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
+        this.load.image( "target", 'assets/images/target.png' )
     }
 
     loadingText : Phaser.GameObjects.Text = null;
+
+    target : JBTarget;
 
     create() {
         let width = this.cameras.main.width;
@@ -69,6 +73,42 @@ export default class MainScreen extends Phaser.Scene
             this.camera = values[0];
             this.jbPoseDetection = values[1];
         });
+
+        this.target = new JBTarget( this, 200, 200 );
+        this.add.existing( this.target );
+        console.log(`this.target ${this.target}`);
+
+        
+        const tween = this.tweens.add( { 
+            targets: this.target,
+            scaleX: 0.3,
+            scaleY: 0.3,
+            yoyo: false,
+            repeat: 1,
+            duration: 1000,
+            ease: 'Sine.easeInOut',
+            onComplete: function (tween, targets, ref ) {
+                console.log(`tween completed ${ref} ${ref.target}`);
+                // for ( var t in targets ) {
+                //     console.log(`reset ${t}`);
+                //     t.setActive = false;
+                // }
+                ref.target.setActive( false );
+                ref.target.setVisible( false );
+            },
+            onCompleteParams: [this]
+        } );
+
+        const timer = this.time.addEvent( {
+            delay: 1000, 
+            callback: (tween, target) => {
+                target.setPosition( Math.random() * width, Math.random() * height );
+                tween.restart();
+            }, 
+            args: [tween, this.target ], 
+            callbackScope: this,
+            repeat: -1,
+        } );
     }
 
     randomRGBA() {
@@ -86,7 +126,7 @@ export default class MainScreen extends Phaser.Scene
         //ctx.fillStyle = this.randomRGBA();
         //ctx.fillRect(0,0,this.canvas.width, this.canvas.height );
 
-        console.log(`draw context ${cam} ${this.canvas.width}x${this.canvas.height} ${this}, ${this.canvas}, ${this.canvas.context}`);
+        //console.log(`draw context ${cam} ${this.canvas.width}x${this.canvas.height} ${this}, ${this.canvas}, ${this.canvas.context}`);
 
         if ( cam != null ) {
             //cam.clearContext( ctx, 0, 0, this.canvas.width, this.canvas.height, randomRGBA() );
@@ -106,6 +146,7 @@ export default class MainScreen extends Phaser.Scene
             }
             
         }
+        //this.add.existing( this.target );
     }
 }
 

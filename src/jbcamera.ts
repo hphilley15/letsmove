@@ -16,13 +16,13 @@ export class JBCamera {
     }
 
     drawContext( ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number  ) {
-        console.log(`JBCamera.drawImage ${width}, ${height}`);
+        //console.log(`JBCamera.drawImage ${width}, ${height}`);
         ctx.drawImage( this.video, x, y, width, height );
     }
 
     clearContext( ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, color : string ) {
         ctx.fillStyle = color;
-        console.log(`JBCamera.clearContext ${ctx} ${width}, ${height}`);
+        //console.log(`JBCamera.clearContext ${ctx} ${width}, ${height}`);
         ctx.fillRect( x, y,width, height );
     }
 
