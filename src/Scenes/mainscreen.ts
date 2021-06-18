@@ -32,15 +32,23 @@ export default class MainScreen extends Phaser.Scene
     }
 
     preload() {
-        this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
-        this.load.image( "target", 'assets/images/target.png' )
+        this.load.image("logo", 'assets/images/ntnuerc-logo-1.png');
+        this.load.audio("beep", 'assets/audio/beep_ping.wav');
+  
+  //      this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
+        this.load.image( "target", 'assets/images/target.png' )  
     }
 
-    loadingText : Phaser.GameObjects.Text = null;
+    scorePoints: number;
+    scoreText : Phaser.GameObjects.Text = null;
 
     target : JBTarget;
+    targetTimer : Phaser.Time.TimerEvent;
+    targetTween : Phaser.Tweens.Tween;
 
     create() {
+        this.sound.add( "beep" );
+
         let width = this.cameras.main.width;
         let height = this.cameras.main.height;
         console.log( `create: ${width} ${height}`);
@@ -53,17 +61,18 @@ export default class MainScreen extends Phaser.Scene
 
         this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( 800/this.canvas.width, 600/this.canvas.height );
 
-        this.loadingText = this.make.text({
-            x: width / 2,
-            y: height / 2 - 50,
-            text: 'Main Screen',
+        this.scorePoints = 0;
+        this.scoreText = this.make.text({
+            x: 10,
+            y: 10,
+            text: `Score: ${this.scorePoints.toFixed(0)}`,
             style: {
-                color: '#a0b030',
+                color: '#e0e030',
                 font: '32px monospace',
             }
         });
 
-        this.loadingText.setOrigin(0.5, 0.5);
+        this.scoreText.setOrigin(0, 0);
 
         const params = { 'targetFPS': 60, 'sizeOption': "" };
         const camera = JBCamera.factory("video", params );
@@ -72,50 +81,55 @@ export default class MainScreen extends Phaser.Scene
         Promise.all( [camera, jbpose ] ).then( values => {
             this.camera = values[0];
             this.jbPoseDetection = values[1];
+
+            this.target = new JBTarget( this, 200, 200 );
+            this.add.existing( this.target );
+            console.log(`this.target ${this.target}`);
+    
+            this.targetTween = this.tweens.add( { 
+                targets: this.target,
+                scaleX: 0.3,
+                scaleY: 0.3,
+                yoyo: false,
+                repeat: 1,
+                duration: 1000,
+                ease: 'Sine.easeInOut',
+                onComplete: function (tween, targets, ref ) {
+                    console.log(`tween completed ${ref} ${ref.target}`);
+                    // for ( var t in targets ) {
+                    //     console.log(`reset ${t}`);
+                    //     t.setActive = false;
+                    // }
+                    ref.target.setActive( false );
+                    ref.target.setVisible( false );
+                },
+                onCompleteParams: [this]
+            } );
+    
+            this.targetTimer = this.time.addEvent( {
+                delay: 1000, 
+                callback: this.updateTarget, 
+                args: [this.targetTween, this.target ], 
+                callbackScope: this,
+                repeat: -1,
+            } );    
         });
 
-        this.target = new JBTarget( this, 200, 200 );
-        this.add.existing( this.target );
-        console.log(`this.target ${this.target}`);
-
-        
-        const tween = this.tweens.add( { 
-            targets: this.target,
-            scaleX: 0.3,
-            scaleY: 0.3,
-            yoyo: false,
-            repeat: 1,
-            duration: 1000,
-            ease: 'Sine.easeInOut',
-            onComplete: function (tween, targets, ref ) {
-                console.log(`tween completed ${ref} ${ref.target}`);
-                // for ( var t in targets ) {
-                //     console.log(`reset ${t}`);
-                //     t.setActive = false;
-                // }
-                ref.target.setActive( false );
-                ref.target.setVisible( false );
-            },
-            onCompleteParams: [this]
-        } );
-
-        const timer = this.time.addEvent( {
-            delay: 1000, 
-            callback: (tween, target) => {
-                target.setPosition( Math.random() * width, Math.random() * height );
-                tween.restart();
-            }, 
-            args: [tween, this.target ], 
-            callbackScope: this,
-            repeat: -1,
-        } );
     }
 
+    updateTarget( tween : Phaser.Tweens.Tween, target : JBTarget ) {
+        console.log("Update target");
+        target.setPosition( Math.random() * this.cameras.main.width, Math.random() * this.cameras.main.height );
+        this.target.setActive( true );
+        this.target.setVisible( true );
+        this.target.tint = Phaser.Display.Color.GetColor(255, 255, 0);
+        tween.restart();
+    }
+    
     randomRGBA() {
         let o = Math.round, r = Math.random, s = 255;
         return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
     }
-
 
     update( time : number, delta : number ) {
         //console.log(`mainScreen.update ${time} ${delta}`);
@@ -139,14 +153,33 @@ export default class MainScreen extends Phaser.Scene
                 const jb = this.jbPoseDetection;
                 jb.getPoses().then( poses => {
                     this.jbPoseDetection.drawResults( poses, ctx )
+                    if ( this.target.visible ) {
+                        
+                        let width = this.cameras.main.width;
+                        let height = this.cameras.main.height;
+
+                        let radius = Math.min(width, height) / 10;
+
+                        const { min, minIndex } = this.jbPoseDetection.calcMinDist( poses[0], this.target.x, this.target.y );
+                        if ( ( min >= 0 ) && ( min < this.target.scale * this.target.width ) ) {
+                            this.sound.play("beep");
+                            console.log(`Hit min ${min} minIndex ${minIndex} target.scale ${this.target.scale} target.width ${this.target.width}`);
+                            this.target.tint = Phaser.Display.Color.GetColor(255, 140, 160);
+                            this.scorePoints = this.scorePoints + 10 * this.target.scale;
+                            console.log(`scorePoints: ${this.scorePoints}`);
+                            this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
+                            
+                            this.target.setActive( false );
+                            this.target.setVisible( false );
+
+                        }
+                    }
                     this.canvas.refresh();
                 });
             } else {
                 this.canvas.refresh();
             }
-            
         }
-        //this.add.existing( this.target );
     }
 }
 

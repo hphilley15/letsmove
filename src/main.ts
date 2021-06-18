@@ -18,7 +18,11 @@ const config = {
   width: 800,
   height: 600,
   backgroundColor : 'rgba(71, 15, 15, 1.0)',
-  scene: [Boot, PreLoader, MainScreen ]
+  scene: [Boot, PreLoader, MainScreen ],
+  scale : {
+    mode: Phaser.Scale.FIT,
+    autocenter: Phaser.Scale.CENTER_BOTH,
+  }
 };
 
 const game = new Phaser.Game(config);

@@ -29,6 +29,7 @@ module.exports = {
       patterns: [
         { from: 'index.html', context: 'src/' },
         { from: 'assets/images/*', context: 'src/' },
+        { from: 'assets/audio/*', context: 'src/' },
       ],
     }),
   ],

@@ -24,13 +24,12 @@ export class JBPoseDetection {
     }
 
     drawResults( poses, context : CanvasRenderingContext2D ) {
-        
         for (const pose of poses) {
           this.drawResult(pose, context );
         }
     }    
     
-    drawResult(pose, context : CanvasRenderingContext2D ) {
+    drawResult(pose : poseDetection.Pose, context : CanvasRenderingContext2D ) {
         if (pose.keypoints != null) {
             this.drawKeypoints(pose.keypoints, context );
             this.drawSkeleton(pose.keypoints, context );
@@ -96,5 +95,24 @@ export class JBPoseDetection {
             context.stroke();
           }
         });
-    }    
+    }
+    
+    calcMinDist( pose : poseDetection.Pose, x : number, y : number ) {
+        //console.dir( pose );
+        let min = -1;
+        let minIndex = -1;
+        if ( pose.keypoints != null ) {
+            for( let i = 0; i < pose.keypoints.length; i++ ) {
+                const kp = pose.keypoints[i];
+                if ( kp.score > 0.5 ) {
+                    let d = Math.hypot( kp.x - x, kp.y - y );
+                    if ( ( minIndex < 0 ) || ( min > d ) ) {
+                        min = d;
+                        minIndex = i;
+                    }
+                }
+            }
+        }
+        return { min, minIndex };
+    }
 }

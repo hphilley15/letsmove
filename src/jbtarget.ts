@@ -2,14 +2,7 @@ import * as Phaser from 'phaser';
 
 export default class JBTarget extends Phaser.GameObjects.Sprite {
     constructor( scene : Phaser.Scene, x : number, y : number ) {
-
-        let width = scene.cameras.main.width;
-        let height = scene.cameras.main.height;
-
-        let radius = Math.min(width, height) / 10;
         super( scene, x, y, 'target' );
-
-        this.tint = Phaser.Display.Color.GetColor(255, 140, 160);
     }
 }
 
