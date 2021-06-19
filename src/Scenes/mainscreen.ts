@@ -3,6 +3,7 @@ import * as Phaser from 'phaser';
 import {JBCamera, JBCameraParam } from "../jbcamera";
 import { JBPoseDetection } from "../jbposedetection";
 import JBTarget from '../jbtarget';
+// import { isMobile } from '../utils';
 
 export default class MainScreen extends Phaser.Scene
 {
@@ -14,17 +15,18 @@ export default class MainScreen extends Phaser.Scene
     constructor ()
     {
         super('main_screen');
-        const videoConfig : MediaStreamConstraints = {
-            'audio' : false,
-            'video' : {
-                facingMode : 'user',
-                width: 360,
-                height: 270,
-                frameRate: {
-                    ideal: 30
-                }
-            }
-        }; 
+
+        // const videoConfig : MediaStreamConstraints = {
+        //     'audio' : false,
+        //     'video' : {
+        //         facingMode : 'user',
+        //         width: isMobile( ) ? 0 : 360,
+        //         height: isMobile( ) ? 0 : 270,
+        //         frameRate: {
+        //             ideal: 30
+        //         }
+        //     }
+        // }; 
 
         // const stream = navigator.mediaDevices.getUserMedia( videoConfig ).then( (stream) => {
         //     this.stream = stream;
@@ -46,33 +48,15 @@ export default class MainScreen extends Phaser.Scene
     targetTimer : Phaser.Time.TimerEvent;
     targetTween : Phaser.Tweens.Tween;
 
+    scaleX : number;
+    scaleY : number;
+
     create() {
         this.sound.add( "beep" );
 
         let width = this.cameras.main.width;
         let height = this.cameras.main.height;
-        console.log( `create: ${width} ${height}`);
-
-        this.canvas = this.textures.createCanvas( 'webcam', 360, 240 );
-        const ctx = this.canvas.context;
-
-        // ctx.translate(0, this.canvas.width);
-        //ctx.scale(-1,1);
-
-        this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( 800/this.canvas.width, 600/this.canvas.height );
-
-        this.scorePoints = 0;
-        this.scoreText = this.make.text({
-            x: 10,
-            y: 10,
-            text: `Score: ${this.scorePoints.toFixed(0)}`,
-            style: {
-                color: '#e0e030',
-                font: '32px monospace',
-            }
-        });
-
-        this.scoreText.setOrigin(0, 0);
+        //console.log( `create: ${width} ${height}`);
 
         const params = { 'targetFPS': 60, 'sizeOption': "" };
         const camera = JBCamera.factory("video", params );
@@ -82,20 +66,48 @@ export default class MainScreen extends Phaser.Scene
             this.camera = values[0];
             this.jbPoseDetection = values[1];
 
+            this.canvas = this.textures.createCanvas( 'webcam', this.camera.video.width, this.camera.video.height );
+            const ctx = this.canvas.context;
+    
+            // ctx.translate(0, this.canvas.width);
+            //ctx.scale(-1,1);
+    
+            this.scaleX = 800.0/this.canvas.width;
+            this.scaleY = 600.0/this.canvas.height;
+    
+            //console.log(`scaleX ${this.scaleX} scaleY ${this.scaleY}`);
+    
+            this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( this.scaleX, this.scaleY );
+    
+            this.scorePoints = 0;
+            this.scoreText = this.make.text({
+                x: 10,
+                y: 10,
+                text: `Score: ${this.scorePoints.toFixed(0)}`,
+                style: {
+                    color: '#e0e030',
+                    font: '32px monospace',
+                }
+            });
+    
+            this.scoreText.setOrigin(0, 0);
+
             this.target = new JBTarget( this, 200, 200 );
             this.add.existing( this.target );
-            console.log(`this.target ${this.target}`);
+            //console.log(`this.target ${this.target}`);
     
+            const duration = 1000;
+
             this.targetTween = this.tweens.add( { 
                 targets: this.target,
                 scaleX: 0.3,
                 scaleY: 0.3,
                 yoyo: false,
                 repeat: 1,
-                duration: 1000,
+                duration: duration,
                 ease: 'Sine.easeInOut',
                 onComplete: function (tween, targets, ref ) {
-                    console.log(`tween completed ${ref} ${ref.target}`);
+                    //console.log(`tween completed ${ref} ${ref.target}`);
                     // for ( var t in targets ) {
                     //     console.log(`reset ${t}`);
                     //     t.setActive = false;
@@ -107,7 +119,7 @@ export default class MainScreen extends Phaser.Scene
             } );
     
             this.targetTimer = this.time.addEvent( {
-                delay: 1000, 
+                delay: duration, 
                 callback: this.updateTarget, 
                 args: [this.targetTween, this.target ], 
                 callbackScope: this,
@@ -118,8 +130,10 @@ export default class MainScreen extends Phaser.Scene
     }
 
     updateTarget( tween : Phaser.Tweens.Tween, target : JBTarget ) {
-        console.log("Update target");
+        //console.log("Update target");
         target.setPosition( Math.random() * this.cameras.main.width, Math.random() * this.cameras.main.height );
+        //target.setPosition( 600, 400 );
+        
         this.target.setActive( true );
         this.target.setVisible( true );
         this.target.tint = Phaser.Display.Color.GetColor(255, 255, 0);
@@ -132,17 +146,18 @@ export default class MainScreen extends Phaser.Scene
     }
 
     update( time : number, delta : number ) {
-        //console.log(`mainScreen.update ${time} ${delta}`);
+        if ( ( this.camera != null ) && ( this.canvas != null ) ) {
 
-        let ctx : CanvasRenderingContext2D = this.canvas.context;
-        let cam = this.camera;
-        
-        //ctx.fillStyle = this.randomRGBA();
-        //ctx.fillRect(0,0,this.canvas.width, this.canvas.height );
+            //console.log(`mainScreen.update ${time} ${delta}`);
 
-        //console.log(`draw context ${cam} ${this.canvas.width}x${this.canvas.height} ${this}, ${this.canvas}, ${this.canvas.context}`);
+            let ctx : CanvasRenderingContext2D = this.canvas.context;
+            let cam = this.camera;
+            
+            //ctx.fillStyle = this.randomRGBA();
+            //ctx.fillRect(0,0,this.canvas.width, this.canvas.height );
 
-        if ( cam != null ) {
+            //console.log(`draw context ${cam} ${this.canvas.width}x${this.canvas.height} ${this}, ${this.canvas}, ${this.canvas.context}`);
+
             //cam.clearContext( ctx, 0, 0, this.canvas.width, this.canvas.height, randomRGBA() );
 
             // ctx.fillStyle = this.randomRGBA();
@@ -160,13 +175,21 @@ export default class MainScreen extends Phaser.Scene
 
                         let radius = Math.min(width, height) / 10;
 
-                        const { min, minIndex } = this.jbPoseDetection.calcMinDist( poses[0], this.target.x, this.target.y );
-                        if ( ( min >= 0 ) && ( min < this.target.scale * this.target.width ) ) {
+                        // X Coordinate must be flipped since we draw it flipped. Argh
+                        let tx = ( this.cameras.main.width - this.target.x ) / this.scaleX;
+                        let ty = this.target.y / this.scaleY
+
+                        
+                        const { min, minIndex } = this.jbPoseDetection.calcMinDist( poses[0], tx, ty );
+                        //console.log( `min ${min} ${minIndex}`);
+
+                        let thresh = 1.5 * this.target.scale / Math.max( this.scaleX, this.scaleY) * Math.min( this.target.width, this.target.height );
+                        if ( ( min >= 0 ) && ( min <  thresh ) ) {
                             this.sound.play("beep");
-                            console.log(`Hit min ${min} minIndex ${minIndex} target.scale ${this.target.scale} target.width ${this.target.width}`);
+                            //console.log(`Hit min ${min} minIndex ${minIndex} thresh ${thresh} target.scale ${this.target.scale} target.width ${this.target.width}`);
                             this.target.tint = Phaser.Display.Color.GetColor(255, 140, 160);
                             this.scorePoints = this.scorePoints + 10 * this.target.scale;
-                            console.log(`scorePoints: ${this.scorePoints}`);
+                            //console.log(`scorePoints: ${this.scorePoints}`);
                             this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
                             
                             this.target.setActive( false );

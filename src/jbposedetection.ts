@@ -33,6 +33,7 @@ export class JBPoseDetection {
         if (pose.keypoints != null) {
             this.drawKeypoints(pose.keypoints, context );
             this.drawSkeleton(pose.keypoints, context );
+            console.log(`Nose ${pose.keypoints[0].x}, ${pose.keypoints[0].y}`);
         }
     }
     
@@ -63,7 +64,6 @@ export class JBPoseDetection {
         // If score is null, just show the keypoint.
         const score = keypoint.score != null ? keypoint.score : 1;
         const scoreThreshold = 0.50; // params.STATE.modelConfig.scoreThreshold || 0;
-    
         if (score >= scoreThreshold) {
           const circle = new Path2D();
           circle.arc(keypoint.x, keypoint.y, 5.0 /* params.DEFAULT_RADIUS */, 0, 2 * Math.PI);
@@ -98,7 +98,7 @@ export class JBPoseDetection {
     }
     
     calcMinDist( pose : poseDetection.Pose, x : number, y : number ) {
-        //console.dir( pose );
+        console.dir( pose );
         let min = -1;
         let minIndex = -1;
         if ( pose.keypoints != null ) {
@@ -106,6 +106,7 @@ export class JBPoseDetection {
                 const kp = pose.keypoints[i];
                 if ( kp.score > 0.5 ) {
                     let d = Math.hypot( kp.x - x, kp.y - y );
+                    console.log(`kp[${i}] at ${kp.x}, ${kp.y}, to ${x},${y} = d ${d}`);
                     if ( ( minIndex < 0 ) || ( min > d ) ) {
                         min = d;
                         minIndex = i;

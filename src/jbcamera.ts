@@ -1,4 +1,5 @@
 //import * as poseDetection from '@tensorflow-models/pose-detection';
+import { isMobile } from "./utils";
 
 export type JBCameraParam = {
     'targetFPS' : number;
@@ -41,8 +42,8 @@ export class JBCamera {
             'audio' : false,
             'video' : {
                 facingMode : 'user',
-                width: 360,
-                height: 270,
+                width: isMobile() ? 0 : 360,
+                height: isMobile() ? 0 : 270,
                 frameRate: {
                     ideal: targetFPS
                 }
@@ -63,6 +64,8 @@ export class JBCamera {
 
         camera.video.width = videoWidth;
         camera.video.height = videoHeight;
+        
+        console.log(`camera ${camera.video.width}x${camera.video.height}`);
 
         // camera.canvas.width = videoWidth;
         // camera.canvas.height = videoHeight;
