@@ -1,5 +1,6 @@
-import { PoseDetector } from '@tensorflow-models/pose-detection';
 import * as Phaser from 'phaser';
+import * as poseDetection from '@tensorflow-models/pose-detection';
+
 import {JBCamera, JBCameraParam } from "../jbcamera";
 import { JBPoseDetection } from "../jbposedetection";
 import JBTarget from '../jbtarget';
@@ -131,8 +132,30 @@ export default class MainScreen extends Phaser.Scene
 
     updateTarget( tween : Phaser.Tweens.Tween, target : JBTarget ) {
         //console.log("Update target");
-        target.setPosition( Math.random() * this.cameras.main.width, Math.random() * this.cameras.main.height );
-        //target.setPosition( 600, 400 );
+        let xt : number;
+        let yt : number;
+
+        let tx : number;
+        let ty : number;
+        
+        for( var i = 0; i < 50; i++ ) {
+            xt = Math.random() * this.cameras.main.width;
+            yt =  Math.random() * this.cameras.main.height;
+
+            tx = ( this.cameras.main.width - xt ) / this.scaleX;
+            ty = yt / this.scaleY
+
+            const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], tx, ty );
+            let thresh = 1.5 * Math.max( this.target.width, this.target.height );
+            //console.log(`trying target ${i} with thresh ${thresh} distance ${min}`);
+                        
+            if ( min >= thresh ) {
+                console.log(`created target ${i} with thresh ${thresh} distance ${min}`);
+                break;
+            }
+        }
+        target.setPosition( xt, yt );
+        //target.setPosition( 600, 400 ); 
         
         this.target.setActive( true );
         this.target.setVisible( true );
@@ -144,6 +167,8 @@ export default class MainScreen extends Phaser.Scene
         let o = Math.round, r = Math.random, s = 255;
         return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
     }
+
+    currentPoses : poseDetection.Pose = null;
 
     update( time : number, delta : number ) {
         if ( ( this.camera != null ) && ( this.canvas != null ) ) {
@@ -167,6 +192,8 @@ export default class MainScreen extends Phaser.Scene
             if ( this.jbPoseDetection != null ) {
                 const jb = this.jbPoseDetection;
                 jb.getPoses().then( poses => {
+                    this.currentPoses = poses;
+
                     this.jbPoseDetection.drawResults( poses, ctx )
                     if ( this.target.visible ) {
                         
@@ -179,8 +206,7 @@ export default class MainScreen extends Phaser.Scene
                         let tx = ( this.cameras.main.width - this.target.x ) / this.scaleX;
                         let ty = this.target.y / this.scaleY
 
-                        
-                        const { min, minIndex } = this.jbPoseDetection.calcMinDist( poses[0], tx, ty );
+                        const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], tx, ty );
                         //console.log( `min ${min} ${minIndex}`);
 
                         let thresh = 1.5 * this.target.scale / Math.max( this.scaleX, this.scaleY) * Math.min( this.target.width, this.target.height );
