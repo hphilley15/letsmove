@@ -105,7 +105,7 @@ export default class MainScreen extends Phaser.Scene
             let target = new JBTarget( this, this.jbPoseDetection, 1000 );
 
             let scaleX = this.game.canvas.width / this.camera.video.videoWidth;;
-            let scaleY = this.game.canvas.height / this.camera.video.videoWidth;;
+            let scaleY = this.game.canvas.height / this.camera.video.videoHeight;;
     
             this.gameToPoseMatrix.translate( new Phaser.Math.Vector2( this.camera.video.videoWidth, 0  ) ).scale( new Phaser.Math.Vector2( - 1/scaleX, 1/scaleY ) );
             console.log( "gameToPoseMatrix" );

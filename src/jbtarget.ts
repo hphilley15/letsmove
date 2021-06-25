@@ -40,10 +40,10 @@ export default class JBTarget extends Phaser.GameObjects.Sprite {
             onCompleteScope: this,
         } );
 
-        console.log( `jbtarget: duration ${this.duration} ${0.5*this.duration}` );
+        console.log( `jbtarget: duration ${this.duration} ${this.duration}` );
 
         this.timer = this.scene.time.addEvent( {
-            delay: 5.0 * this.duration, 
+            delay: 1.0 * this.duration, 
             callback: this.updateTarget, 
             args: [ ], 
             callbackScope: this,
