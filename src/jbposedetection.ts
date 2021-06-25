@@ -6,9 +6,16 @@ export class JBPoseDetection {
     detector : any;
     model : poseDetection.SupportedModels;
 
+    width : number;
+    height : number;
+
     private constructor( video : string, model : poseDetection.SupportedModels ) {
         const vel = document.getElementById(video);
         this.videoElement = vel as HTMLVideoElement;
+        
+        this.width = this.videoElement.width;
+        this.height = this.videoElement.height;
+
         this.model = model;
     }
 
@@ -116,4 +123,7 @@ export class JBPoseDetection {
         }
         return { min, minIndex };
     }
+
+    scaleX : number;
+    scaleY : number;
 }
