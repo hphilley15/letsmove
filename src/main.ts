@@ -6,7 +6,7 @@ import '@tensorflow/tfjs-backend-webgl';
 // import '@tensorflow/tfjs-backend-wasm';
 import { JBCamera, JBCameraParam } from "./jbcamera";
 import { JBPoseDetection } from "./jbposedetection";
-
+import LoginScreen from './Scenes/loginscreen';
 import * as Phaser from "phaser";
 import PreLoader from './Scenes/preloader';
 import Boot from './Scenes/boot';
@@ -18,7 +18,7 @@ const config = {
   width: 800,
   height: 600,
   backgroundColor : 'rgba(71, 15, 15, 1.0)',
-  scene: [Boot, PreLoader, MainScreen ],
+  scene: [Boot, PreLoader, LoginScreen, MainScreen ],
   scale : {
     mode: Phaser.Scale.FIT,
     autocenter: Phaser.Scale.CENTER_BOTH,

@@ -13,6 +13,9 @@ class PreLoader extends Phaser.Scene{
        this.load.on('progress', (value) => {
         console.log(`progress ${value}`);
         this.percentText.setText( (value * 100).toString() + '%');
+        
+        this.progressBar = this.add.graphics();
+        
         this.progressBar.clear();
         this.progressBar.fillStyle(0xffffff, 1);
         this.progressBar.fillRect(250, 280, 300 * value, 30);
@@ -31,7 +34,7 @@ class PreLoader extends Phaser.Scene{
         this.percentText.destroy();
         this.assetText.destroy();
 
-        this.scene.start( 'main_screen' );
+        this.scene.start( 'LoginScreen' );
        });
     };
 
@@ -46,7 +49,7 @@ class PreLoader extends Phaser.Scene{
       this.load.audio("beep", 'assets/audio/beep_ping.wav');
 
 //      this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
-      this.load.image( "target", 'assets/images/target.png' )
+      this.load.image( "target", 'assets/images/target.png' );
 
       var width = this.cameras.main.width;
       var height = this.cameras.main.height;
@@ -80,7 +83,6 @@ class PreLoader extends Phaser.Scene{
       });
       this.assetText.setOrigin(0.5, 0.5);
 
-      this.progressBar = this.add.graphics();
       this.progressBox = this.add.graphics();
       this.progressBox.fillStyle(0x222222, 0.8);
       this.progressBox.fillRect(340, 370, 320, 50);

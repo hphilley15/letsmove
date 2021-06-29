@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "npm: build",
+			"detail": "webpack serve --config webpack.prod.js"
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "npm: start",
+			"detail": "webpack serve --open --config webpack.dev.js"
+		}
+	]
+}
