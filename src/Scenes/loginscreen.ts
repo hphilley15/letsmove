@@ -29,15 +29,13 @@ class LoginScreen extends Phaser.Scene{
         loop: -1
       });
 
-      this.add.text(10, 300, 'Enter your name:', { font: '48px Courier', backgroundColor : '#303030' } );
+      this.add.text(10, 200, 'Enter your name:', { font: '48px Courier', backgroundColor : '#303030' } );
 
       let bar = this.add.graphics();
       bar.fillStyle(0x303030, 1.0);
-      bar.fillRect(10, 350, 600, 50);
+      bar.fillRect(10, 250, 600, 50);
 
-
-      let textEntry = this.add.text(10, 350, '', { font: '48px Courier', backgroundColor: '#303030' } );
-    
+      let textEntry = this.add.text(10, 250, '', { font: '48px Courier', backgroundColor: '#303030' } );
   
       this.input.keyboard.on('keydown', (event) => {
           console.log( `event.keyCode ${event.keyCode}`);
@@ -55,7 +53,7 @@ class LoginScreen extends Phaser.Scene{
           }
       });
   
-      this.button = this.add.text( 10, 400, "Done", { font: '48px Courier', backgroundColor: '#D9E23D' } )
+      this.button = this.add.text( 500, 320, "Done", { font: '48px Courier', backgroundColor: '#D9E23D' } )
         .setInteractive()
         .on('pointerdown', () => this.scene.start( 'main_screen' ) );
     }
