@@ -7,19 +7,23 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --open --config webpack.dev.js",
     "build": "webpack build --config webpack.prod.js",
-    "gh-pages" : "webpack build --config webpack.prod.js && gh-pages -d dist -b gh-pages"
+    "gh-pages": "webpack build --config webpack.prod.js && gh-pages -d dist -b gh-pages"
   },
   "author": "Jacky Baltes <jacky.baltes@ntnu.edu.tw>",
   "license": "ISC",
   "dependencies": {
     "@tensorflow-models/pose-detection": "^0.0.3",
-    "phaser": "^3.55.2"
+    "axios": "^0.21.1",
+    "phaser": "^3.55.2",
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "@types/node": "^15.14.2",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "copy-webpack-plugin": "^9.0.0",
     "ts-loader": "^9.2.3",
-    "typescript": "^4.3.2",
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.5",
     "webpack": "^5.38.1",
     "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2",

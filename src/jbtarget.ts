@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { JBPoseDetection } from './jbposedetection';
-import MainScreen from './Scenes/mainscreen';
+import { MainScreen } from './Scenes/mainscreen';
 
 export default class JBTarget extends Phaser.GameObjects.Sprite {
     timer : Phaser.Time.TimerEvent;

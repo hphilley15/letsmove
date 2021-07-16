@@ -102,4 +102,4 @@ class PreLoader extends Phaser.Scene{
     }
 }
 
-export default PreLoader;
+export { PreLoader };

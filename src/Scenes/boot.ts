@@ -1,4 +1,4 @@
-export default class Boot extends Phaser.Scene
+class Boot extends Phaser.Scene
 {
     constructor ()
     {
@@ -12,3 +12,5 @@ export default class Boot extends Phaser.Scene
         this.scene.start('PreLoader');
     }
 }
+
+export { Boot };

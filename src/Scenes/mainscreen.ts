@@ -6,7 +6,7 @@ import { JBPoseDetection } from "../jbposedetection";
 import JBTarget from '../jbtarget';
 // import { isMobile } from '../utils';
 
-export default class MainScreen extends Phaser.Scene
+class MainScreen extends Phaser.Scene
 {
     camera : JBCamera = null;
     jbPoseDetection : JBPoseDetection = null;
@@ -249,3 +249,5 @@ export default class MainScreen extends Phaser.Scene
 //     //camera.drawContext();
 //     //jbpose.drawResults(poses, camera.context);
 // });
+
+export { MainScreen };
