@@ -1,9 +1,9 @@
 import * as Phaser from 'phaser';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 
-import {JBCamera, JBCameraParam } from "../jbcamera";
+import { JBCamera, JBCameraParam } from "../jbcamera";
 import { JBPoseDetection } from "../jbposedetection";
-import JBTarget from '../jbtarget';
+import { JBTarget } from '../jbtarget';
 // import { isMobile } from '../utils';
 
 class MainScreen extends Phaser.Scene
@@ -25,7 +25,7 @@ class MainScreen extends Phaser.Scene
         //         height: isMobile( ) ? 0 : 270,
         //         frameRate: {
         //             ideal: 30
-        //         }
+        //         }}
         //     }
         // }; 
 
@@ -66,6 +66,9 @@ class MainScreen extends Phaser.Scene
     startTime = 0;
     timeText : Phaser.GameObjects.Text = null;
 
+    scaleX : number;
+    scaleY : number;
+
     create() {
         this.sound.add( "beep" );
         let rnd = ( Math.random() * this.backgrounds.length ).toFixed();
@@ -90,7 +93,6 @@ class MainScreen extends Phaser.Scene
         const params = { 'targetFPS': 60, 'sizeOption': "" };
         const camera = JBCamera.factory("video", params );
         const jbpose = JBPoseDetection.factory("video");
-        
 
         Promise.all( [camera, jbpose ] ).then( values => {
             this.camera = values[0];
@@ -102,26 +104,24 @@ class MainScreen extends Phaser.Scene
             // ctx.translate(0, this.canvas.width);
             //ctx.scale(-1,1);
     
-            let target = new JBTarget( this, this.jbPoseDetection, 1000 );
-
-            let scaleX = this.game.canvas.width / this.camera.video.videoWidth;;
-            let scaleY = this.game.canvas.height / this.camera.video.videoHeight;;
+            this.scaleX = this.game.canvas.width / this.camera.video.videoWidth;;
+            this.scaleY = this.game.canvas.height / this.camera.video.videoHeight;;
     
-            this.gameToPoseMatrix.translate( new Phaser.Math.Vector2( this.camera.video.videoWidth, 0  ) ).scale( new Phaser.Math.Vector2( - 1/scaleX, 1/scaleY ) );
+            this.gameToPoseMatrix.translate( new Phaser.Math.Vector2( this.camera.video.videoWidth, 0  ) ).scale( new Phaser.Math.Vector2( - 1/this.scaleX, 1/this.scaleY ) );
             console.log( "gameToPoseMatrix" );
             console.dir( this.gameToPoseMatrix );
-            this.targets.push( target );
-            target.updateTarget();
+            
+            //target.updateTarget();
             
             //console.log(`scaleX ${this.scaleX} scaleY ${this.scaleY}`);
     
-            this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( scaleX, scaleY );
+            this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( this.scaleX, this.scaleY );
     
             this.scorePoints = 0;
             this.scoreText = this.make.text({
                 x: 10,
                 y: 10,
-                text: `Score: ${this.scorePoints.toFixed(0)}`,
+                text: `User: ${this.registry.get('userName')}, Score: ${this.scorePoints.toFixed(0)}`,
                 style: {
                     color: '#e0e030',
                     font: '32px monospace',
@@ -139,10 +139,10 @@ class MainScreen extends Phaser.Scene
                 }
             });
             this.timeText.setOrigin(1, 0);
-    
-            this.add.existing( target );
+
             this.sound.play( snd, sndConfig );
 
+            //this.createTargets(3);
             this.startTime = this.time.now;
         });
     }
@@ -181,41 +181,75 @@ class MainScreen extends Phaser.Scene
                 jb.getPoses().then( poses => {
                     this.currentPoses = poses;
 
-                    this.jbPoseDetection.drawResults( poses, ctx )
-                    if ( this.targets[0].visible ) {
-                        
-                       let width = this.cameras.main.width;
-                       let height = this.cameras.main.height;
+                    this.jbPoseDetection.drawResults( poses, ctx );
 
-                       let radius = Math.min(width, height) / 10;
+                    let width = this.cameras.main.width;
+                    let height = this.cameras.main.height;
 
+                    let radius = Math.min(width, height) / 10;
 
-                       let {tx, ty } = this.gameToPoseCoords( this.targets[0].x, this.targets[0].y );
-
-                       const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], tx, ty );
-                       //console.log( `tx ${tx} ty ${ty} min ${min} ${minIndex}`);
-
-                       let thresh = 64; // 1.5 * this.targets[0].scale / Math.max( this.scaleX, this.scaleY) * Math.min( this.target.width, this.target.height );
-                       if ( ( min >= 0 ) && ( min <  thresh ) ) {
-                           this.sound.play("beep");
-                           console.log(`Hit min ${min} minIndex ${minIndex} thresh ${thresh} target.scale ${this.targets[0].scale} target.width ${this.targets[0].width}`);
-                           this.targets[0].tint = Phaser.Display.Color.GetColor(255, 140, 160);
-                           this.scorePoints = this.scorePoints + 10 * this.targets[0].scale;
-                           console.log( `scorePoints: ${this.scorePoints} scale ${this.targets[0].scale}` );
-                           this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
-                            
-                           this.targets[0].setActive( false );
-                           this.targets[0].setVisible( false );
-
+                    for (let target of this.targets ) {
+                        if ( target.active ) {
+                            let {tx, ty } = this.gameToPoseCoords( target.x, target.y );
+    
+                            const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], tx, ty );
+                            //console.log( `tx ${tx} ty ${ty} min ${min} ${minIndex}`);
+    
+                            let thresh = target.scale / Math.max( this.scaleX, this.scaleY) * Math.min( target.width, target.height );
+                            if ( ( min >= 0 ) && ( min <  thresh ) ) {
+                                this.sound.play("beep");
+                                console.log(`Hit min ${min} minIndex ${minIndex} thresh ${thresh} target.scale ${this.targets[0].scale} target.width ${this.targets[0].width}`);
+                                target.tint = Phaser.Display.Color.GetColor(255, 140, 160);
+                                this.scorePoints = this.scorePoints + 10 * target.scale;
+                                console.log( `scorePoints: ${this.scorePoints} scale ${target.scale}` );
+                                this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
+                                target.disableTarget( 10 * target.scale );
+                            }
                         }
                     }
+                    console.log("pose detection closure");
+                    console.dir(this);
+
                     this.canvas.refresh();
+                    this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
+                    if ( this.targets.length === 0 ) {
+                        this.createTargets(3);
+                        this.startTargets();
+                    }
                 });
-            } else {
-                this.canvas.refresh();
             }
+            // this.canvas.refresh();
+            // this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
+            // if ( this.targets.length === 0 ) {
+            //     this.createTargets(3);
+            //     this.startTargets();
+            // }
         }
     }
+
+    createTargets( numTargets : number ) {
+        this.targets = new Array<JBTarget>();
+
+        for( let i = 0; i < numTargets; i++ ) {
+            let t = new JBTarget( this, this.jbPoseDetection );
+            t.setRandomPosition();
+            this.targets.push( t );
+            this.add.existing( t );
+        }
+        this.startTargets();
+    }
+
+    stopTargets( ) {
+        for( let t of this.targets ) {
+            t.stop( );
+        }
+    } 
+
+    startTargets( ) {
+        for( let t of this.targets ) {
+            t.start( 1000 );
+        }
+    } 
 
     gameToPoseCoords( x: number, y : number ) {
         let vec = new Phaser.Math.Vector3( x, y, 1 ).transformMat3( this.gameToPoseMatrix );

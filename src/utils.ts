@@ -1,8 +1,8 @@
-export function isNavigatorDefined() {
+function isNavigatorDefined() {
     return typeof navigator !== 'undefined' && navigator != null;
-  }
+}
   
-export function isMobileNav(nav) {
+function isMobileNav(nav) {
     if (nav || isNavigatorDefined()) {
         if (!nav) {
         nav = navigator;
@@ -21,21 +21,23 @@ export function isMobileNav(nav) {
     return false;
 }
   
-export function isBrowser() {
+function isBrowser() {
     return  typeof window !== 'undefined' && window.document != null || //@ts-ignore
             typeof WorkerGlobalScope !== 'undefined';
 }
   
-export function isiOS() {
+function isiOS() {
     return /iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
   
-export function isAndroid() {
+function isAndroid() {
     return /Android/i.test(navigator.userAgent);
 }
   
-export function isMobile() {
+function isMobile() {
     let mob : boolean = isAndroid() || isiOS();
     console.log(`isMobile() => ${mob}`);
     return mob;
 }
+
+export { isMobile, isAndroid, isiOS, isBrowser, isMobileNav, isNavigatorDefined };

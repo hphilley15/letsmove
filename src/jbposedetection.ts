@@ -1,7 +1,7 @@
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import { findBackendFactory } from '@tensorflow/tfjs-core';
 
-export class JBPoseDetection {
+class JBPoseDetection {
     videoElement : HTMLVideoElement;
     detector : any;
     model : poseDetection.SupportedModels;
@@ -127,3 +127,5 @@ export class JBPoseDetection {
     scaleX : number;
     scaleY : number;
 }
+
+export { JBPoseDetection };

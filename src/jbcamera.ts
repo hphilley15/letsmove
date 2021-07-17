@@ -1,12 +1,12 @@
 //import * as poseDetection from '@tensorflow-models/pose-detection';
 import { isMobile } from "./utils";
 
-export type JBCameraParam = {
+type JBCameraParam = {
     'targetFPS' : number;
     'sizeOption' : string;
 }
 
-export class JBCamera {
+class JBCamera {
     videoId : string;
     canvas : HTMLCanvasElement;
     video : HTMLVideoElement;
@@ -77,3 +77,5 @@ export class JBCamera {
         return camera;
     }
 }
+
+export {JBCamera, JBCameraParam };
