@@ -21,6 +21,10 @@ class JBTargetHit extends Phaser.GameObjects.Sprite {
 
     hit : Phaser.GameObjects.Text;
 
+    curve: Phaser.Curves.Spline;
+
+    path: { t: number, vec: Phaser.Math.Vector2 };
+    
     start( x: number, y : number, score : number ) {
         this.x = x;
         this.y = y;
@@ -31,13 +35,29 @@ class JBTargetHit extends Phaser.GameObjects.Sprite {
             this.hit = this.scene.add.text(x, y, `- ${score.toFixed()}`, { font: '48px Courier', backgroundColor: '#303030' } );
         }
 
+        // this.tween = this.scene.tweens.add( { 
+        //     start : 0,
+        //     targets: this.hit,
+        //     scaleX: 0.1,
+        //     scaleY: 0.1,
+        //     yoyo: false,
+        //     repeat: 0,
+        //     duration: 1000,
+        //     ease: 'Sine.easeInOut',
+        //     onComplete: function () {
+        //         console.log( `onComplete Hit: ${this}` );
+        //         this.disableTarget();
+        //         console.log( "Target Hit tween completed" );
+        //     },
+        //     onCompleteScope: this,
+        // } );
+
+        this.path = { t: 0, vec: new Phaser.Math.Vector2() };
+
         this.tween = this.scene.tweens.add( { 
-            start : 0,
-            targets: this.hit,
-            scaleX: 0.1,
-            scaleY: 0.1,
-            yoyo: false,
-            repeat: 1,
+            targets: this.path,
+            t: 1,
+            repeat: 0,
             duration: 1000,
             ease: 'Sine.easeInOut',
             onComplete: function () {
@@ -48,6 +68,17 @@ class JBTargetHit extends Phaser.GameObjects.Sprite {
             onCompleteScope: this,
         } );
 
+        let tar = { x: 10, y: 10 };
+        this.curve = new Phaser.Curves.Spline([
+            [ this.x, this.y ],
+            [ this.x, (this.y - tar.y)/2],
+            [(this.x - tar.x)/2, (this.y - tar.y)/2],
+            [ tar.x, tar.y ]
+        ]);
+    
+        let r = this.scene.add.curve(this.x, this.y, this.curve);
+        r.setStrokeStyle(5, 0xffff00);
+    
         // this.timer = this.scene.time.addEvent( {
         //     delay: this.duration, 
         //     callback: this., 
@@ -64,7 +95,18 @@ class JBTargetHit extends Phaser.GameObjects.Sprite {
         this.setVisible( false );
 
         this.hit.destroy();  
+        //this.curve.destroy();
         this.destroy(); 
+    }
+
+    update( time: number, delta : number ) {
+        let pt = this.curve.getPoint(this.path.t, this.path.vec);
+        console.log( `jbtargethit update ${pt.x}, ${pt.y}`);
+
+        this.x = pt.x;
+        this.y = pt.y;
+        this.hit.x = this.x;
+        this.hit.y = this.y;
     }
 
     // updateTarget( ) {

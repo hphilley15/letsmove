@@ -20,6 +20,9 @@ class JBTarget extends Phaser.GameObjects.Sprite {
         
         this.jbPoseDetection = jbPoseDetection;
 
+        this.active = false;
+        this.visible = false;
+
         //console.log(`this.target ${this.target}`);
 
     }
@@ -33,7 +36,7 @@ class JBTarget extends Phaser.GameObjects.Sprite {
             scaleX: 0.3,
             scaleY: 0.3,
             yoyo: false,
-            repeat: 1,
+            repeat: 0,
             duration: this.duration,
             ease: 'Sine.easeInOut',
             onComplete: function () {
@@ -44,7 +47,7 @@ class JBTarget extends Phaser.GameObjects.Sprite {
             onCompleteScope: this,
         } );
 
-        console.log( `jbtarget: duration ${this.duration} ${this.duration}` );
+        console.log( `jbtarget: duration x=${this.x},y=${this.y}, duration=${this.duration}` );
 
         // this.timer = this.scene.time.addEvent( {
         //     delay: this.duration, 
@@ -56,7 +59,11 @@ class JBTarget extends Phaser.GameObjects.Sprite {
 
         this.setActive( true );
         this.setVisible( true );
+
+        this.scene.add.existing( this );
     }
+
+    hit : JBTargetHit;
 
     disableTarget( score: number ) {
         this.setActive( false );
@@ -64,12 +71,16 @@ class JBTarget extends Phaser.GameObjects.Sprite {
 
         console.log( `Disable target ${this.scene}` );
         if ( score !== 0 ) {
-            let hit = new JBTargetHit( this.scene );
-            hit.start( this.x, this.y, score );
+            this.hit = new JBTargetHit( this.scene );
+            this.hit.start( this.x, this.y, score );
         }
-        //this.destroy();
     }
 
+    update( time: number, delta: number ) {
+        if ( ( this.hit !== null ) && ( this.hit !== undefined ) && ( this.hit.visible ) ) {
+            this.hit.update( time, delta );
+        } 
+    }
     // updateTarget( ) {
     //     console.log("Update target");
     //     let xt : number;

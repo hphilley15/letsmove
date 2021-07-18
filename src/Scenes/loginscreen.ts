@@ -37,7 +37,7 @@ class LoginScreen extends Phaser.Scene{
       bar.fillStyle(0x303030, 1.0);
       bar.fillRect(10, 250, 600, 50);
 
-      this.textEntry = this.add.text(10, 250, '', { font: '48px Courier', backgroundColor: '#303030' } );
+      this.textEntry = this.add.text(10, 250, this.createRandomName(), { font: '48px Courier', backgroundColor: '#303030' } );
   
       this.input.keyboard.on('keydown', (event) => {
           console.log( `event.keyCode ${event.keyCode}`);
@@ -59,6 +59,10 @@ class LoginScreen extends Phaser.Scene{
     nextScreen( ) {
       this.registry.set( 'userName', this.textEntry.text );
       this.scene.start( 'main_screen' );
+    }
+
+    createRandomName( ) {
+      return "John Doe"
     }
 }
 

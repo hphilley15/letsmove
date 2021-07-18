@@ -215,14 +215,19 @@ class MainScreen extends Phaser.Scene
                     console.log("pose detection closure");
                     console.dir(this);
 
+                    for( let t of this.targets ) {
+                        t.update( time, delta );
+                    }
                     this.canvas.refresh();
-                    this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
-                    if ( this.targets.length === 0 ) {
+                    let cnt = this.cleanUpTargets( );
+                    //this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
+                    if ( cnt === 0 ) {
                         this.createTargets(3);
                         this.startTargets();
                     }
                 });
             }
+            
             // this.canvas.refresh();
             // this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
             // if ( this.targets.length === 0 ) {
@@ -232,6 +237,18 @@ class MainScreen extends Phaser.Scene
         }
     }
 
+    cleanUpTargets( ) {
+        let cnt = 0;
+        for( let t of this.targets ) {
+            if ( t.active ) {
+                cnt = cnt + 1;
+            } else {
+                t.destroy();
+            }
+        }
+        return cnt;
+    }
+
     createTargets( numTargets : number ) {
         this.targets = new Array<JBTarget>();
 
@@ -239,9 +256,8 @@ class MainScreen extends Phaser.Scene
             let t = new JBTarget( this, this.jbPoseDetection );
             t.setRandomPosition();
             this.targets.push( t );
-            this.add.existing( t );
         }
-        this.startTargets();
+        //this.startTargets();
     }
 
     stopTargets( ) {
@@ -252,6 +268,8 @@ class MainScreen extends Phaser.Scene
 
     startTargets( ) {
         for( let t of this.targets ) {
+            console.log(`start target ${t.x}, ${t.y}`);
+            
             t.start( 1000 );
         }
     } 
