@@ -50,7 +50,12 @@ class MainScreen extends Phaser.Scene
         this.backgrounds.push("bg3");
         
   //      this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
-        this.load.image( "target", 'assets/images/target.png' )  
+        this.load.image( "target", 'assets/images/target.png' );
+        
+        this.jbPoseDetectionPromise = JBPoseDetection.factory("video");
+        
+        const params = { 'targetFPS': 60, 'sizeOption': "" };
+        this.cameraPromise = JBCamera.factory("video", params );
     }
 
 
@@ -68,6 +73,9 @@ class MainScreen extends Phaser.Scene
 
     scaleX : number;
     scaleY : number;
+
+    jbPoseDetectionPromise : Promise<JBPoseDetection>;
+    cameraPromise: Promise<JBCamera>;
 
     create() {
         this.sound.add( "beep" );
@@ -90,11 +98,8 @@ class MainScreen extends Phaser.Scene
         let height = this.cameras.main.height;
         //console.log( `create: ${width} ${height}`);
 
-        const params = { 'targetFPS': 60, 'sizeOption': "" };
-        const camera = JBCamera.factory("video", params );
-        const jbpose = JBPoseDetection.factory("video");
-
-        Promise.all( [camera, jbpose ] ).then( values => {
+        
+        Promise.all( [this.cameraPromise, this.jbPoseDetectionPromise ] ).then( values => {
             this.camera = values[0];
             this.jbPoseDetection = values[1];
 
@@ -277,11 +282,11 @@ class MainScreen extends Phaser.Scene
 //     this.canvas.refresh();
     
 
-// const poses = jbpose.getPoses().then((poses) => {
+// const poses = jbPoseDetectionPromise.getPoses().then((poses) => {
 //     //console.log(poses[0].keypoints);
 //     //camera.clearContext();
 //     //camera.drawContext();
-//     //jbpose.drawResults(poses, camera.context);
+//     //jbPoseDetectionPromise.drawResults(poses, camera.context);
 // });
 
 export { MainScreen };
