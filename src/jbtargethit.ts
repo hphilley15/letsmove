@@ -76,8 +76,8 @@ class JBTargetHit extends Phaser.GameObjects.Sprite {
             [ tar.x, tar.y ]
         ]);
     
-        let r = this.scene.add.curve(this.x, this.y, this.curve);
-        r.setStrokeStyle(5, 0xffff00);
+        //let r = this.scene.add.curve(this.x, this.y, this.curve);
+        //r.setStrokeStyle(5, 0xffff00);
     
         // this.timer = this.scene.time.addEvent( {
         //     delay: this.duration, 
