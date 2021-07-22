@@ -10,6 +10,7 @@ import { PreLoader } from './Scenes/preloader';
 import { Boot } from './Scenes/boot';
 import { MainScreen } from './Scenes/mainscreen';
 //import axios from "axios";
+import AwaitLoaderPlugin from 'phaser3-rex-plugins/plugins/awaitloader-plugin.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -21,6 +22,15 @@ const config = {
   scale : {
     mode: Phaser.Scale.FIT,
     autocenter: Phaser.Scale.CENTER_BOTH,
+  },
+  plugins: {
+    global: [{
+        key: 'rexAwaitLoader',
+        plugin: AwaitLoaderPlugin,
+        start: true
+    },
+    // ...
+    ]
   }
 };
 
