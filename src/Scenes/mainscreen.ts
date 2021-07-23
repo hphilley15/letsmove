@@ -4,7 +4,7 @@ import * as poseDetection from '@tensorflow-models/pose-detection';
 import { JBCamera, JBCameraParam } from "../jbcamera";
 import { JBPoseDetection } from "../jbposedetection";
 import { JBTarget } from '../jbtarget';
-// import { isMobile } from '../utils';
+import { isMobile } from '../utils';
 
 class MainScreen extends Phaser.Scene
 {
@@ -61,6 +61,8 @@ class MainScreen extends Phaser.Scene
 
     jbPoseDetectionPromise : Promise<JBPoseDetection>;
     cameraPromise: Promise<JBCamera>;
+
+    logText : Phaser.GameObjects.Text = null;
 
     create() {
         this.sound.add( "beep" );
@@ -134,7 +136,20 @@ class MainScreen extends Phaser.Scene
             this.sound.play( snd, sndConfig );
     
             //this.createTargets(3);
-            this.startTime = this.time.now;    
+            this.startTime = this.time.now; 
+            
+            this.logText = this.make.text( {
+                x : 0,
+                y : 0,
+                text: 'Log:',
+                style: {
+                    color: 'black',
+                    font: '14px monospace',
+                }
+            });
+
+            let logKey = this.input.keyboard.addKey('L');
+            logKey.on( 'down', (event) => { if (this.logText.visible ) { this.logText.setVisible(false) } else { this.logText.setVisible( true ) } } );
         });
     }
 
@@ -150,7 +165,10 @@ class MainScreen extends Phaser.Scene
 
         if ( ( this.camera != null ) && ( this.jbPoseDetection != null ) && ( this.canvas != null ) ) {
 
-            
+            this.logText.text = `
+                isMobile: ${isMobile() } camera: ${this.camera.video.width}x${this.camera.video.height}
+            `;
+
             let ctx : CanvasRenderingContext2D = this.canvas.context;
             let cam = this.camera;
             

@@ -27,11 +27,6 @@ class JBCamera {
         ctx.fillRect( x, y,width, height );
     }
 
-    // randomRGBA() {
-    //     let o = Math.round, r = Math.random, s = 255;
-    //     return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
-    // }
-
     static async factory( videoId : string, cameraParam : JBCameraParam ) {
         if ( ( ! navigator.mediaDevices ) || ( ! navigator.mediaDevices.getUserMedia ) ) {
             throw new Error("No video camera available");
