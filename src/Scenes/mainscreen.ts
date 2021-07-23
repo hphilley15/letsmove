@@ -5,7 +5,6 @@ import { JBCamera, JBCameraParam } from "../jbcamera";
 import { JBPoseDetection } from "../jbposedetection";
 import { JBTarget } from '../jbtarget';
 // import { isMobile } from '../utils';
-import AwaitLoaderPlugin from 'phaser3-rex-plugins/plugins/awaitloader-plugin.js';
 
 class MainScreen extends Phaser.Scene
 {
@@ -53,16 +52,11 @@ class MainScreen extends Phaser.Scene
   //      this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
         this.load.image( "target", 'assets/images/target.png' );
         
-        (this.load as AwaitLoaderPlugin).rexAwait(function(successCallback, failureCallback) { 
-            const params = { 'targetFPS': 60, 'sizeOption': "" };
-            Promise.all( [ JBCamera.factory("video", params), JBPoseDetection.factory("video") ] ).then( values => {
-                this.camera = values[0];
-                this.jbPoseDetection = values[1];
-                successCallback();
-            });  
-        }, this );
-  
-        
+        Promise.all( [ JBCamera.factory("video", params), JBPoseDetection.factory("video") ] ).then( values => {
+            this.camera = values[0];
+            this.jbPoseDetection = values[1];
+            successCallback();
+        });  
     }
 
 
