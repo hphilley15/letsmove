@@ -161,7 +161,7 @@ class MainScreen extends Phaser.Scene
     currentPoses : poseDetection.Pose = null;
 
     update( time : number, delta : number ) {
-        if ( ( this.camera != null ) && ( this.canvas != null ) ) {
+        if ( ( this.camera != null ) && ( this.jbPoseDetection != null ) && ( this.canvas != null ) ) {
 
             //console.log(`mainScreen.update ${time} ${delta}`);
 
