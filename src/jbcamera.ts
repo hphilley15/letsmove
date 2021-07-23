@@ -3,7 +3,7 @@ import { isMobile } from "./utils";
 
 type JBCameraParam = {
     'targetFPS' : number;
-    'sizeOption' : string;
+    'sizeOption' : { width: number, height: number };
 }
 
 class JBCamera {
@@ -37,8 +37,8 @@ class JBCamera {
             'audio' : false,
             'video' : {
                 facingMode : 'user',
-                width: isMobile() ? 0 : 360,
-                height: isMobile() ? 0 : 270,
+                width: { max: sizeOption.width }, 
+                height: { max: sizeOption.height },
                 frameRate: {
                     ideal: targetFPS
                 }

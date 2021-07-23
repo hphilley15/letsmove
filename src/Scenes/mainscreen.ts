@@ -85,7 +85,7 @@ class MainScreen extends Phaser.Scene
         let height = this.cameras.main.height;
         //console.log( `create: ${width} ${height}`);
     
-        const params = { 'targetFPS': 60, 'sizeOption': "320x240" };
+        const params = { 'targetFPS': 60, 'sizeOption': { width: 320, height: 240 } };
         Promise.all( [ JBCamera.factory("video", params), JBPoseDetection.factory("video") ] ).then( values => {
             this.camera = values[0];
             this.jbPoseDetection = values[1];
