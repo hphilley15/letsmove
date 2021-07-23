@@ -36,29 +36,13 @@ class MainScreen extends Phaser.Scene
 
     backgrounds = Array<string>();
 
-    preload() {
-        this.load.image("logo", 'assets/images/ntnuerc-logo-1.png');
-        this.load.audio("beep", 'assets/audio/beep_ping.wav');
-        
-        this.load.audio("bg1", 'assets/audio/background1.wav');
+    preload() {        
         this.backgrounds.push("bg1");
         
-        this.load.audio("bg2", 'assets/audio/background2.wav');
         this.backgrounds.push("bg2");
         
-        this.load.audio("bg3", 'assets/audio/background3.wav');
         this.backgrounds.push("bg3");
-        
-  //      this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
-        this.load.image( "target", 'assets/images/target.png' );
-        
-        Promise.all( [ JBCamera.factory("video", params), JBPoseDetection.factory("video") ] ).then( values => {
-            this.camera = values[0];
-            this.jbPoseDetection = values[1];
-            successCallback();
-        });  
     }
-
 
     scorePoints: number;
     scoreText : Phaser.GameObjects.Text = null;
@@ -99,52 +83,59 @@ class MainScreen extends Phaser.Scene
         let height = this.cameras.main.height;
         //console.log( `create: ${width} ${height}`);
     
-        this.canvas = this.textures.createCanvas( 'webcam', this.camera.video.width, this.camera.video.height );
-        const ctx = this.canvas.context;
+        const params = { 'targetFPS': 60, 'sizeOption': "320x240" };
+        Promise.all( [ JBCamera.factory("video", params), JBPoseDetection.factory("video") ] ).then( values => {
+            this.camera = values[0];
+            this.jbPoseDetection = values[1];
 
-        // ctx.translate(0, this.canvas.width);
-        //ctx.scale(-1,1);
-
-        this.scaleX = this.game.canvas.width / this.camera.video.videoWidth;;
-        this.scaleY = this.game.canvas.height / this.camera.video.videoHeight;;
-
-        this.gameToPoseMatrix.translate( new Phaser.Math.Vector2( this.camera.video.videoWidth, 0  ) ).scale( new Phaser.Math.Vector2( - 1/this.scaleX, 1/this.scaleY ) );
-        console.log( "gameToPoseMatrix" );
-        console.dir( this.gameToPoseMatrix );
+            this.canvas = this.textures.createCanvas( 'webcam', this.camera.video.width, this.camera.video.height );
         
-        //target.updateTarget();
-        
-        //console.log(`scaleX ${this.scaleX} scaleY ${this.scaleY}`);
+            const ctx = this.canvas.context;
 
-        this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( this.scaleX, this.scaleY );
-
-        this.scorePoints = 0;
-        this.scoreText = this.make.text({
-            x: 10,
-            y: 10,
-            text: `User: ${this.registry.get('userName')}, Score: ${this.scorePoints.toFixed(0)}`,
-            style: {
-                color: '#e0e030',
-                font: '32px monospace',
-            }
+            // ctx.translate(0, this.canvas.width);
+            //ctx.scale(-1,1);
+    
+            this.scaleX = this.game.canvas.width / this.camera.video.videoWidth;;
+            this.scaleY = this.game.canvas.height / this.camera.video.videoHeight;;
+    
+            this.gameToPoseMatrix.translate( new Phaser.Math.Vector2( this.camera.video.videoWidth, 0  ) ).scale( new Phaser.Math.Vector2( - 1/this.scaleX, 1/this.scaleY ) );
+            console.log( "gameToPoseMatrix" );
+            console.dir( this.gameToPoseMatrix );
+            
+            //target.updateTarget();
+            
+            //console.log(`scaleX ${this.scaleX} scaleY ${this.scaleY}`);
+    
+            this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( this.scaleX, this.scaleY );
+    
+            this.scorePoints = 0;
+            this.scoreText = this.make.text({
+                x: 10,
+                y: 10,
+                text: `User: ${this.registry.get('userName')}, Score: ${this.scorePoints.toFixed(0)}`,
+                style: {
+                    color: '#e0e030',
+                    font: '32px monospace',
+                }
+            });
+            this.scoreText.setOrigin(0, 0);
+    
+            this.timeText = this.make.text({
+                x: this.game.canvas.width,
+                y: 10, 
+                text: `Score: ${(this.time.now/1000).toFixed()}`,
+                style: {
+                    color: '#e0e030',
+                    font: '32px monospace',
+                }
+            });
+            this.timeText.setOrigin(1, 0);
+    
+            this.sound.play( snd, sndConfig );
+    
+            //this.createTargets(3);
+            this.startTime = this.time.now;    
         });
-        this.scoreText.setOrigin(0, 0);
-
-        this.timeText = this.make.text({
-            x: this.game.canvas.width,
-            y: 10, 
-            text: `Score: ${(this.time.now/1000).toFixed()}`,
-            style: {
-                color: '#e0e030',
-                font: '32px monospace',
-            }
-        });
-        this.timeText.setOrigin(1, 0);
-
-        this.sound.play( snd, sndConfig );
-
-        //this.createTargets(3);
-        this.startTime = this.time.now;
     }
 
     randomRGBA() {
@@ -155,10 +146,11 @@ class MainScreen extends Phaser.Scene
     currentPoses : poseDetection.Pose = null;
 
     update( time : number, delta : number ) {
+        console.log(`mainScreen.update ${time} ${delta}`);
+
         if ( ( this.camera != null ) && ( this.jbPoseDetection != null ) && ( this.canvas != null ) ) {
 
-            //console.log(`mainScreen.update ${time} ${delta}`);
-
+            
             let ctx : CanvasRenderingContext2D = this.canvas.context;
             let cam = this.camera;
             
@@ -229,6 +221,8 @@ class MainScreen extends Phaser.Scene
             //     this.createTargets(3);
             //     this.startTargets();
             // }
+        } else {
+            console.log("Loading");
         }
     }
 

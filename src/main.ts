@@ -9,7 +9,6 @@ import * as Phaser from "phaser";
 import { PreLoader } from './Scenes/preloader';
 import { Boot } from './Scenes/boot';
 import { MainScreen } from './Scenes/mainscreen';
-//import axios from "axios";
 
 const config = {
   type: Phaser.AUTO,
