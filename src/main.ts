@@ -9,12 +9,16 @@ import * as Phaser from "phaser";
 import { PreLoader } from './Scenes/preloader';
 import { Boot } from './Scenes/boot';
 import { MainScreen } from './Scenes/mainscreen';
+import { isMobile } from './utils';
+
+let vw = isMobile() ? window.innerHeight : window.innerWidth;
+let vh = isMobile() ? window.innerHeight : window.innerWidth;
 
 const config = {
   type: Phaser.AUTO,
   parent: "NTNU ERC Let's Move",
-  width: window.innerWidth,
-  height: window.innerHeight,
+  width: vw,
+  height: vh,
   backgroundColor : 'rgba(71, 15, 15, 1.0)',
   scene: [Boot, PreLoader, LoginScreen, MainScreen ],
   scale : {
