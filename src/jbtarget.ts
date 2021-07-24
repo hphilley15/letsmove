@@ -13,9 +13,11 @@ class JBTarget extends Phaser.GameObjects.Sprite {
 
     duration : number;
 
-    constructor( scene : Phaser.Scene, jbPoseDetection : JBPoseDetection ) {
-        super( scene, -1000, -1000, 'target' );
+    oScale : number;
 
+    constructor( scene : Phaser.Scene, private points: number, jbPoseDetection : JBPoseDetection, img: string  = 'target' ) {
+        super( scene, -1000, -1000, img );
+        
         this.mainScreen = scene as MainScreen;
         
         this.jbPoseDetection = jbPoseDetection;
@@ -23,8 +25,10 @@ class JBTarget extends Phaser.GameObjects.Sprite {
         this.active = false;
         this.visible = false;
 
-        //console.log(`this.target ${this.target}`);
+        this.oScale = (window.innerWidth * 0.1) / this.width;
 
+        this.scale = this.oScale; 
+        //console.log(`this.target ${this.target}`);
     }
 
     start( duration : number ) {
@@ -33,8 +37,7 @@ class JBTarget extends Phaser.GameObjects.Sprite {
         this.tween = this.mainScreen.tweens.add( { 
             start : 0,
             targets: this,
-            scaleX: 0.3,
-            scaleY: 0.3,
+            scale: 0.3 * this.oScale,
             yoyo: false,
             repeat: 0,
             duration: this.duration,
@@ -65,7 +68,11 @@ class JBTarget extends Phaser.GameObjects.Sprite {
 
     hit : JBTargetHit;
 
-    disableTarget( score: number ) {
+    disableTarget( score? : number ) {
+        if ( score === undefined ) {
+            score = this.getPoints();
+        }
+
         this.setActive( false );
         this.setVisible( false );
 
@@ -81,6 +88,11 @@ class JBTarget extends Phaser.GameObjects.Sprite {
             this.hit.update( time, delta );
         } 
     }
+
+    getPoints( ) {
+        return this.points * this.scale / this.oScale;
+    }
+
     // updateTarget( ) {
     //     console.log("Update target");
     //     let xt : number;
@@ -120,9 +132,9 @@ console.log("registering gameobjectfactory");
 
 Phaser.GameObjects.GameObjectFactory.register(
 	'jbtarget',
-	function (this: Phaser.GameObjects.GameObjectFactory, jbPoseDetection : JBPoseDetection ) {
+	function (this: Phaser.GameObjects.GameObjectFactory, points: number, jbPoseDetection : JBPoseDetection ) {
         console.log("gameobjectfactory called");
-		const jbtarget = new JBTarget( this.scene, jbPoseDetection );
+		const jbtarget = new JBTarget( this.scene, points, jbPoseDetection );
 
         this.displayList.add( jbtarget );
         this.updateList.add( jbtarget );

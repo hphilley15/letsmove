@@ -5,6 +5,8 @@ import { JBCamera, JBCameraParam } from "../jbcamera";
 import { JBPoseDetection } from "../jbposedetection";
 import { JBTarget } from '../jbtarget';
 import { isMobile } from '../utils';
+import { JBBomb } from '../jbbomb';
+import { JBStar } from '../jbstar';
 
 class MainScreen extends Phaser.Scene
 {
@@ -16,27 +18,14 @@ class MainScreen extends Phaser.Scene
     constructor ( )
     {
         super('main_screen');
-
-        // const videoConfig : MediaStreamConstraints = {
-        //     'audio' : false,
-        //     'video' : {
-        //         facingMode : 'user',
-        //         width: isMobile( ) ? 0 : 360,
-        //         height: isMobile( ) ? 0 : 270,
-        //         frameRate: {
-        //             ideal: 30
-        //         }}
-        //     }
-        // }; 
-
-        // const stream = navigator.mediaDevices.getUserMedia( videoConfig ).then( (stream) => {
-        //     this.stream = stream;
-        // });
     }
 
     backgrounds = Array<string>();
 
     preload() {        
+        this.load.image("star", 'assets/images/star.png');
+        this.load.image("bomb", 'assets/images/bomb.png');
+
         this.backgrounds.push("bg1");
         
         this.backgrounds.push("bg2");
@@ -66,7 +55,10 @@ class MainScreen extends Phaser.Scene
 
     create() {
         this.sound.add( "beep" );
-        let rnd = ( Math.random() * this.backgrounds.length ).toFixed();
+        console.log( `bg sounds: ${this.backgrounds}`);
+
+        let rnd = ( Math.random() * ( this.backgrounds.length - 1 ) ).toFixed();
+        console.log( `bg sounds: ${this.backgrounds} rnd ${rnd}`);
         let snd = this.backgrounds[rnd]
 
         const sndConfig = {
@@ -79,13 +71,15 @@ class MainScreen extends Phaser.Scene
             delay: 0
         };
 
+        console.log( `snd ${snd}, sndConfig ${sndConfig}` );
+        
         this.bgSound = this.sound.add( snd, sndConfig );
 
         let width = this.cameras.main.width;
         let height = this.cameras.main.height;
         //console.log( `create: ${width} ${height}`);
     
-        const params = { 'targetFPS': 60, 'sizeOption': { width: 320, height: 240 } };
+        const params = { 'targetFPS': 60, 'sizeOption': { width: 320, height: 320 } };
         Promise.all( [ JBCamera.factory("video", params), JBPoseDetection.factory("video") ] ).then( values => {
             this.camera = values[0];
             this.jbPoseDetection = values[1];
@@ -205,15 +199,18 @@ class MainScreen extends Phaser.Scene
                             const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], tx, ty );
                             //console.log( `tx ${tx} ty ${ty} min ${min} ${minIndex}`);
     
-                            let thresh = target.scale / Math.max( this.scaleX, this.scaleY) * Math.min( target.width, target.height );
+                            let thresh = target.oScale / Math.max( this.scaleX, this.scaleY) * Math.min( target.width, target.height );
                             if ( ( min >= 0 ) && ( min <  thresh ) ) {
                                 this.sound.play("beep");
                                 console.log(`Hit min ${min} minIndex ${minIndex} thresh ${thresh} target.scale ${this.targets[0].scale} target.width ${this.targets[0].width}`);
                                 target.tint = Phaser.Display.Color.GetColor(255, 140, 160);
-                                this.scorePoints = this.scorePoints + 10 * target.scale;
+
+                                console.log( `pt ${target.getPoints()} oScale: ${target.oScale} scale: ${target.scale}`);
+
+                                this.scorePoints = this.scorePoints + target.getPoints();
                                 console.log( `scorePoints: ${this.scorePoints} scale ${target.scale}` );
                                 this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
-                                target.disableTarget( 10 * target.scale );
+                                target.disableTarget( );
                             }
                         }
                     }
@@ -260,7 +257,7 @@ class MainScreen extends Phaser.Scene
         this.targets = new Array<JBTarget>();
 
         for( let i = 0; i < numTargets; i++ ) {
-            let t = new JBTarget( this, this.jbPoseDetection );
+            let t = ( Math.random() > 0.25 ) ? new JBStar( this, this.jbPoseDetection ) : new JBBomb( this, this.jbPoseDetection );
             t.setRandomPosition();
             this.targets.push( t );
         }

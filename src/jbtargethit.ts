@@ -30,9 +30,9 @@ class JBTargetHit extends Phaser.GameObjects.Sprite {
         this.y = y;
 
         if ( score >= 0 ) {
-            this.hit = this.scene.add.text(x, y, `+ ${score.toFixed()}`, { font: '48px Courier', backgroundColor: '#303030' } );
+            this.hit = this.scene.add.text(x, y, `+ ${score.toFixed()}`, { font: '48px Courier', color: '#ffff00', backgroundColor: '#00000000' } );
         } else {
-            this.hit = this.scene.add.text(x, y, `- ${score.toFixed()}`, { font: '48px Courier', backgroundColor: '#303030' } );
+            this.hit = this.scene.add.text(x, y, `${score.toFixed()}`, { font: '48px Courier', color: '#ff3030', backgroundColor: '#00000000' } );
         }
 
         // this.tween = this.scene.tweens.add( { 

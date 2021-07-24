@@ -13,8 +13,8 @@ import { MainScreen } from './Scenes/mainscreen';
 const config = {
   type: Phaser.AUTO,
   parent: "NTNU ERC Let's Move",
-  width: 800,
-  height: 600,
+  width: window.innerWidth,
+  height: window.innerHeight,
   backgroundColor : 'rgba(71, 15, 15, 1.0)',
   scene: [Boot, PreLoader, LoginScreen, MainScreen ],
   scale : {
