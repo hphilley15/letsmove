@@ -50,7 +50,6 @@ class MainScreen extends Phaser.Scene
 
     bgSound : Phaser.Sound.BaseSound;
 
-    startTime = 0;
     timeText : Phaser.GameObjects.Text = null;
 
     scaleX : number;
@@ -61,6 +60,9 @@ class MainScreen extends Phaser.Scene
 
     logText : Phaser.GameObjects.Text = null;
     announceText : Phaser.GameObjects.Text = null;
+
+    currentTime : number;
+    trialStartTime : number;
 
     create() {
         this.sound.add( "beep" );
@@ -91,6 +93,27 @@ class MainScreen extends Phaser.Scene
         //console.log( `create: ${width} ${height}`);
     
         const params = { 'targetFPS': 60, 'sizeOption': { width: 320, height: 320 } };
+
+        let vw = window.innerWidth;
+        let vh = window.innerHeight;
+
+        this.announceText = this.make.text( {
+            x : 0.5 * vw, 
+            y : 0.5 * vh,
+            text: `Announcement: Loading ...
+            `,
+            style: {
+                color: 'red',
+                font: '64px monospace',
+            } 
+        });
+
+        this.announceText.setOrigin( 0.5, 0.5 );
+        this.announceText.setDepth(10);
+
+        this.currentPhase = MainScreenPhase.WAITING_FOR_TRIAL_START;
+        this.nextPhase = MainScreenPhase.WAITING_FOR_TRIAL_START;
+
         Promise.all( [ JBCamera.factory("video", params), JBPoseDetection.factory("video") ] ).then( values => {
             this.camera = values[0];
             this.jbPoseDetection = values[1];
@@ -119,7 +142,7 @@ class MainScreen extends Phaser.Scene
             this.scoreText = this.make.text({
                 x: 10,
                 y: 10,
-                text: `User: ${this.registry.get('userName')}, Score: ${this.scorePoints.toFixed(0)}`,
+                text: `User: ${this.registry.get('userName')}, Score: ${this.scorePoints.toFixed()}`,
                 style: {
                     color: '#e0e030',
                     font: '32px monospace',
@@ -127,10 +150,12 @@ class MainScreen extends Phaser.Scene
             });
             this.scoreText.setOrigin(0, 0);
     
+            this.currentTime = ( ( this.time.now - this.trialStartTime ) / 1000 ); //.toFixed();
+
             this.timeText = this.make.text({
                 x: this.game.canvas.width,
                 y: 10, 
-                text: `Score: ${(this.time.now/1000).toFixed()}`,
+                text: `Score: ${this.currentTime.toFixed()}`,
                 style: {
                     color: '#e0e030',
                     font: '32px monospace',
@@ -141,7 +166,6 @@ class MainScreen extends Phaser.Scene
             this.sound.play( snd, sndConfig );
     
             //this.createTargets(3);
-            this.startTime = this.time.now; 
             
             this.logText = this.make.text( {
                 x : 0,
@@ -155,21 +179,6 @@ class MainScreen extends Phaser.Scene
 
             let logKey = this.input.keyboard.addKey('L');
             logKey.on( 'down', (event) => { if (this.logText.visible ) { this.logText.setVisible(false) } else { this.logText.setVisible( true ) } } );
-
-            let vw = window.innerWidth;
-            let vh = window.innerHeight;
-
-            this.announceText = this.make.text( {
-                x : 0.5 * vw, 
-                y : 0.5 * vh,
-                text: `Announcement: Loading ...
-                `,
-                style: {
-                    color: 'red',
-                    font: '32px monospace',
-                } 
-            });
-            this.announceText.setOrigin( 0.5, 0.5 );
         });
     }
 
@@ -185,28 +194,48 @@ class MainScreen extends Phaser.Scene
     nextPhase: MainScreenPhase;
 
     update( time : number, delta : number ) {
-        console.log(`mainScreen.update ${time} ${delta}`);
-
-        this.prevPhase = this.currentPhase;
         this.currentPhase = this.nextPhase;
 
+        console.log(`mainScreen.update ${time} ${delta} ${this.prevPhase} -> ${this.currentPhase} `);
+
         if ( this.prevPhase !== this.currentPhase ) {
-            if ( this.currentPhase === MainScreenPhase.TRIAL_RUNNING ) {
+            if ( this.currentPhase === MainScreenPhase.WAITING_FOR_TRIAL_START ) {
+                this.announceText.text = 'Loading ...';
+                this.announceText.setVisible( true );
+                this.announceText.setActive( true ); 
+
+
+            } else if ( this.currentPhase === MainScreenPhase.TRIAL_RUNNING ) {
+                this.announceText.text = 'Running Trial';
+                this.announceText.setVisible( false );
+                this.announceText.setActive( false ); 
+
+                this.scorePoints = 0;
+                this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
+                                    
+                this.trialStartTime = this.time.now;
+
                 setTimeout( () => {
                     this.nextPhase = MainScreenPhase.TRIAL_DONE;
                 }, 30*1000 );
+            } else if ( this.currentPhase === MainScreenPhase.TRIAL_DONE ) {
+                this.announceText.text = `Trial Finished: 
+Points: ${ this.scorePoints.toFixed() }
+                `;
+                this.announceText.setVisible( true );
+                this.announceText.setActive( true );
+    
+                setTimeout( () => {
+                    this.nextPhase = MainScreenPhase.WAITING_FOR_TRIAL_START;
+                }, 10*1000 );
             }
         }
 
         if ( this.currentPhase == MainScreenPhase.WAITING_FOR_TRIAL_START  ) {
-            this.announceText.text = 'Loading ...';
-            this.announceText.setVisible( true );
-            this.announceText.setActive( true ); 
-        } else if ( this.currentPhase == MainScreenPhase.TRIAL_RUNNING ) {
-            this.announceText.text = 'Running Trial';
-            this.announceText.setVisible( false );
-            this.announceText.setActive( false ); 
-            
+            if ( ( this.camera != null ) && ( this.jbPoseDetection != null ) && ( this.canvas != null ) ) {
+                this.nextPhase = MainScreenPhase.TRIAL_RUNNING;
+            }
+        } else if ( this.currentPhase == MainScreenPhase.TRIAL_RUNNING ) {            
             if ( ( this.camera != null ) && ( this.jbPoseDetection != null ) && ( this.canvas != null ) ) {
 
                 this.logText.text = `
@@ -227,7 +256,7 @@ class MainScreen extends Phaser.Scene
                 // ctx.fillRect(0,0,this.canvas.width, this.canvas.height );
                 cam.drawContext( ctx, 0, 0, this.canvas.width, this.canvas.height );
 
-                let dt = this.time.now - this.startTime;
+                let dt = this.time.now - this.trialStartTime;
                 this.timeText.text = `Time: ${(dt/1000).toFixed() }`;
 
                 if ( this.jbPoseDetection != null ) {
@@ -283,12 +312,8 @@ class MainScreen extends Phaser.Scene
                 }
             }    
         } else if ( this.currentPhase === MainScreenPhase.TRIAL_DONE ) {
-            this.announceText.text = `Trial Finished: 
-            Points: ${this.scorePoints }
-            `;
-            this.announceText.setVisible( true );
-            this.announceText.setActive( true );
         }
+        this.prevPhase = this.currentPhase;
     }
 
     cleanUpTargets( ) {
