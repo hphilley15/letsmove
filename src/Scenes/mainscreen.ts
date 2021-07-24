@@ -31,6 +31,8 @@ class MainScreen extends Phaser.Scene
         this.backgrounds.push("bg2");
         
         this.backgrounds.push("bg3");
+
+        this.load.audio( "bomb", 'assets/audio/bomb.wav' );
     }
 
     scorePoints: number;
@@ -55,6 +57,8 @@ class MainScreen extends Phaser.Scene
 
     create() {
         this.sound.add( "beep" );
+        this.sound.add( "bomb" );
+
         console.log( `bg sounds: ${this.backgrounds}`);
 
         let rnd = ( Math.random() * ( this.backgrounds.length - 1 ) ).toFixed();
@@ -201,7 +205,9 @@ class MainScreen extends Phaser.Scene
     
                             let thresh = target.oScale / Math.max( this.scaleX, this.scaleY) * Math.min( target.width, target.height );
                             if ( ( min >= 0 ) && ( min <  thresh ) ) {
-                                this.sound.play("beep");
+                                let snd = ( target.getPoints() >= 0  ) ? "beep" : "bomb";
+                                this.sound.play( snd );
+                                
                                 console.log(`Hit min ${min} minIndex ${minIndex} thresh ${thresh} target.scale ${this.targets[0].scale} target.width ${this.targets[0].width}`);
                                 target.tint = Phaser.Display.Color.GetColor(255, 140, 160);
 
