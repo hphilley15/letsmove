@@ -11,8 +11,11 @@ import { Boot } from './Scenes/boot';
 import { MainScreen } from './Scenes/mainscreen';
 import { isMobile } from './utils';
 
-let vw = isMobile() ? window.innerHeight : window.innerWidth;
-let vh = isMobile() ? window.innerHeight : window.innerWidth;
+// let vw = isMobile() ? window.innerHeight : window.innerWidth;
+// let vh = isMobile() ? window.innerHeight : window.innerWidth;
+
+let vw = window.innerWidth;
+let vh = window.innerHeight;
 
 const config = {
   type: Phaser.AUTO,
