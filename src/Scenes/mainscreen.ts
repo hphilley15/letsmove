@@ -8,6 +8,12 @@ import { isMobile } from '../utils';
 import { JBBomb } from '../jbbomb';
 import { JBStar } from '../jbstar';
 
+enum MainScreenPhase {
+    WAITING_FOR_TRIAL_START,
+    TRIAL_RUNNING,
+    TRIAL_DONE,
+};
+
 class MainScreen extends Phaser.Scene
 {
     camera : JBCamera = null;
@@ -54,6 +60,7 @@ class MainScreen extends Phaser.Scene
     cameraPromise: Promise<JBCamera>;
 
     logText : Phaser.GameObjects.Text = null;
+    announceText : Phaser.GameObjects.Text = null;
 
     create() {
         this.sound.add( "beep" );
@@ -148,6 +155,21 @@ class MainScreen extends Phaser.Scene
 
             let logKey = this.input.keyboard.addKey('L');
             logKey.on( 'down', (event) => { if (this.logText.visible ) { this.logText.setVisible(false) } else { this.logText.setVisible( true ) } } );
+
+            let vw = window.innerWidth;
+            let vh = window.innerHeight;
+
+            this.announceText = this.make.text( {
+                x : 0.5 * vw, 
+                y : 0.5 * vh,
+                text: `Announcement: Loading ...
+                `,
+                style: {
+                    color: 'red',
+                    font: '32px monospace',
+                } 
+            });
+            this.announceText.setOrigin( 0.5, 0.5 );
         });
     }
 
@@ -158,92 +180,114 @@ class MainScreen extends Phaser.Scene
 
     currentPoses : poseDetection.Pose = null;
 
+    prevPhase : MainScreenPhase;
+    currentPhase : MainScreenPhase;
+    nextPhase: MainScreenPhase;
+
     update( time : number, delta : number ) {
         console.log(`mainScreen.update ${time} ${delta}`);
 
-        if ( ( this.camera != null ) && ( this.jbPoseDetection != null ) && ( this.canvas != null ) ) {
+        this.prevPhase = this.currentPhase;
+        this.currentPhase = this.nextPhase;
 
-            this.logText.text = `
-                isMobile: ${isMobile() } camera: ${this.camera.video.width}x${this.camera.video.height}
-            `;
+        if ( this.prevPhase !== this.currentPhase ) {
+            if ( this.currentPhase === MainScreenPhase.TRIAL_RUNNING ) {
+                setTimeout( () => {
+                    this.nextPhase = MainScreenPhase.TRIAL_DONE;
+                }, 30*1000 );
+            }
+        }
 
-            let ctx : CanvasRenderingContext2D = this.canvas.context;
-            let cam = this.camera;
+        if ( this.currentPhase == MainScreenPhase.WAITING_FOR_TRIAL_START  ) {
+            this.announceText.text = 'Loading ...';
+            this.announceText.setVisible( true );
+            this.announceText.setActive( true ); 
+        } else if ( this.currentPhase == MainScreenPhase.TRIAL_RUNNING ) {
+            this.announceText.text = 'Running Trial';
+            this.announceText.setVisible( false );
+            this.announceText.setActive( false ); 
             
-            //ctx.fillStyle = this.randomRGBA();
-            //ctx.fillRect(0,0,this.canvas.width, this.canvas.height );
+            if ( ( this.camera != null ) && ( this.jbPoseDetection != null ) && ( this.canvas != null ) ) {
 
-            //console.log(`draw context ${cam} ${this.canvas.width}x${this.canvas.height} ${this}, ${this.canvas}, ${this.canvas.context}`);
+                this.logText.text = `
+                    isMobile: ${isMobile() } camera: ${this.camera.video.width}x${this.camera.video.height}
+                `;
 
-            //cam.clearContext( ctx, 0, 0, this.canvas.width, this.canvas.height, randomRGBA() );
+                let ctx : CanvasRenderingContext2D = this.canvas.context;
+                let cam = this.camera;
+                
+                //ctx.fillStyle = this.randomRGBA();
+                //ctx.fillRect(0,0,this.canvas.width, this.canvas.height );
 
-            // ctx.fillStyle = this.randomRGBA();
-            // ctx.fillRect(0,0,this.canvas.width, this.canvas.height );
-            cam.drawContext( ctx, 0, 0, this.canvas.width, this.canvas.height );
+                //console.log(`draw context ${cam} ${this.canvas.width}x${this.canvas.height} ${this}, ${this.canvas}, ${this.canvas.context}`);
 
-            let dt = this.time.now - this.startTime;
-            this.timeText.text = `Time: ${(dt/1000).toFixed() }`;
+                //cam.clearContext( ctx, 0, 0, this.canvas.width, this.canvas.height, randomRGBA() );
 
-            if ( this.jbPoseDetection != null ) {
-                const jb = this.jbPoseDetection;
-                jb.getPoses().then( poses => {
-                    this.currentPoses = poses;
+                // ctx.fillStyle = this.randomRGBA();
+                // ctx.fillRect(0,0,this.canvas.width, this.canvas.height );
+                cam.drawContext( ctx, 0, 0, this.canvas.width, this.canvas.height );
 
-                    this.jbPoseDetection.drawResults( poses, ctx );
+                let dt = this.time.now - this.startTime;
+                this.timeText.text = `Time: ${(dt/1000).toFixed() }`;
 
-                    let width = this.cameras.main.width;
-                    let height = this.cameras.main.height;
+                if ( this.jbPoseDetection != null ) {
+                    const jb = this.jbPoseDetection;
+                    jb.getPoses().then( poses => {
+                        this.currentPoses = poses;
 
-                    let radius = Math.min(width, height) / 10;
+                        this.jbPoseDetection.drawResults( poses, ctx );
 
-                    for (let target of this.targets ) {
-                        if ( target.active ) {
-                            let {tx, ty } = this.gameToPoseCoords( target.x, target.y );
-    
-                            const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], tx, ty );
-                            //console.log( `tx ${tx} ty ${ty} min ${min} ${minIndex}`);
-    
-                            let thresh = target.oScale / Math.max( this.scaleX, this.scaleY) * Math.min( target.width, target.height );
-                            if ( ( min >= 0 ) && ( min <  thresh ) ) {
-                                let snd = ( target.getPoints() >= 0  ) ? "beep" : "bomb";
-                                this.sound.play( snd );
-                                
-                                console.log(`Hit min ${min} minIndex ${minIndex} thresh ${thresh} target.scale ${this.targets[0].scale} target.width ${this.targets[0].width}`);
-                                target.tint = Phaser.Display.Color.GetColor(255, 140, 160);
+                        let width = this.cameras.main.width;
+                        let height = this.cameras.main.height;
 
-                                console.log( `pt ${target.getPoints()} oScale: ${target.oScale} scale: ${target.scale}`);
+                        let radius = Math.min(width, height) / 10;
 
-                                this.scorePoints = this.scorePoints + target.getPoints();
-                                console.log( `scorePoints: ${this.scorePoints} scale ${target.scale}` );
-                                this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
-                                target.disableTarget( );
+                        for (let target of this.targets ) {
+                            if ( target.active ) {
+                                let {tx, ty } = this.gameToPoseCoords( target.x, target.y );
+        
+                                const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], tx, ty );
+                                //console.log( `tx ${tx} ty ${ty} min ${min} ${minIndex}`);
+        
+                                let thresh = target.oScale / Math.max( this.scaleX, this.scaleY) * Math.min( target.width, target.height );
+                                if ( ( min >= 0 ) && ( min <  thresh ) ) {
+                                    let snd = ( target.getPoints() >= 0  ) ? "beep" : "bomb";
+                                    this.sound.play( snd );
+                                    
+                                    console.log(`Hit min ${min} minIndex ${minIndex} thresh ${thresh} target.scale ${this.targets[0].scale} target.width ${this.targets[0].width}`);
+                                    target.tint = Phaser.Display.Color.GetColor(255, 140, 160);
+
+                                    console.log( `pt ${target.getPoints()} oScale: ${target.oScale} scale: ${target.scale}`);
+
+                                    this.scorePoints = this.scorePoints + target.getPoints();
+                                    console.log( `scorePoints: ${this.scorePoints} scale ${target.scale}` );
+                                    this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
+                                    target.disableTarget( );
+                                }
                             }
                         }
-                    }
-                    console.log("pose detection closure");
-                    console.dir(this);
+                        console.log("pose detection closure");
+                        console.dir(this);
 
-                    for( let t of this.targets ) {
-                        t.update( time, delta );
-                    }
-                    this.canvas.refresh();
-                    let cnt = this.cleanUpTargets( );
-                    //this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
-                    if ( cnt === 0 ) {
-                        this.createTargets(3);
-                        this.startTargets();
-                    }
-                });
-            }
-            
-            // this.canvas.refresh();
-            // this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
-            // if ( this.targets.length === 0 ) {
-            //     this.createTargets(3);
-            //     this.startTargets();
-            // }
-        } else {
-            console.log("Loading");
+                        for( let t of this.targets ) {
+                            t.update( time, delta );
+                        }
+                        this.canvas.refresh();
+                        let cnt = this.cleanUpTargets( );
+                        //this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
+                        if ( cnt === 0 ) {
+                            this.createTargets(3);
+                            this.startTargets();
+                        }
+                    });
+                }
+            }    
+        } else if ( this.currentPhase === MainScreenPhase.TRIAL_DONE ) {
+            this.announceText.text = `Trial Finished: 
+            Points: ${this.scorePoints }
+            `;
+            this.announceText.setVisible( true );
+            this.announceText.setActive( true );
         }
     }
 
