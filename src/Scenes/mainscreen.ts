@@ -42,6 +42,8 @@ class MainScreen extends Phaser.Scene
     }
 
     scorePoints: number;
+    currentLevel : number;
+
     scoreText : Phaser.GameObjects.Text = null;
 
     targets : Array<JBTarget> = new Array<JBTarget>();
@@ -63,6 +65,7 @@ class MainScreen extends Phaser.Scene
 
     currentTime : number;
     trialStartTime : number;
+    scoreStartTime : number;
 
     create() {
         this.sound.add( "beep" );
@@ -103,8 +106,8 @@ class MainScreen extends Phaser.Scene
             text: `Announcement: Loading ...
             `,
             style: {
-                color: 'red',
-                font: '64px monospace',
+                color: 'white',
+                font: '32px monospace',
             } 
         });
 
@@ -139,23 +142,25 @@ class MainScreen extends Phaser.Scene
             this.add.image( width/2, height/2, 'webcam').setFlipX( true ).setScale( this.scaleX, this.scaleY );
     
             this.scorePoints = 0;
+            this.currentLevel = 0;
+
             this.scoreText = this.make.text({
                 x: 10,
                 y: 10,
-                text: `User: ${this.registry.get('userName')}, Score: ${this.scorePoints.toFixed()}`,
+                text: `User: ${this.registry.get('userName')}, Level: ${this.currentLevel.toFixed()} Score: ${this.scorePoints.toFixed()}`,
                 style: {
                     color: '#e0e030',
                     font: '32px monospace',
                 }
             });
             this.scoreText.setOrigin(0, 0);
-    
-            this.currentTime = ( ( this.time.now - this.trialStartTime ) / 1000 ); //.toFixed();
+            this.trialStartTime = this.time.now;
+            this.currentTime = ( ( this.time.now - this.trialStartTime ) ); //.toFixed();
 
             this.timeText = this.make.text({
                 x: this.game.canvas.width,
                 y: 10, 
-                text: `Score: ${this.currentTime.toFixed()}`,
+                text: `Time: ${this.currentTime.toFixed()}`,
                 style: {
                     color: '#e0e030',
                     font: '32px monospace',
@@ -200,18 +205,22 @@ class MainScreen extends Phaser.Scene
 
         if ( this.prevPhase !== this.currentPhase ) {
             if ( this.currentPhase === MainScreenPhase.WAITING_FOR_TRIAL_START ) {
-                this.announceText.text = 'Loading ...';
+                this.announceText.text = `
+1.) Step 3 m - 5 m  away from the camera.
+2.) Make sure that the camera can detect your arms and legs.
+3.) Touch the stars and avoid the bombs
+
+Loading ...`;
                 this.announceText.setVisible( true );
                 this.announceText.setActive( true ); 
-
-
             } else if ( this.currentPhase === MainScreenPhase.TRIAL_RUNNING ) {
                 this.announceText.text = 'Running Trial';
                 this.announceText.setVisible( false );
                 this.announceText.setActive( false ); 
 
                 this.scorePoints = 0;
-                this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
+                this.trialMaxScore = 0;
+                this.scoreText.text = `User: ${this.registry.get('userName')}, Level: ${this.currentLevel.toFixed()} Score: ${this.scorePoints.toFixed()}`;
                                     
                 this.trialStartTime = this.time.now;
 
@@ -219,12 +228,10 @@ class MainScreen extends Phaser.Scene
                     this.nextPhase = MainScreenPhase.TRIAL_DONE;
                 }, 30*1000 );
             } else if ( this.currentPhase === MainScreenPhase.TRIAL_DONE ) {
-                this.announceText.text = `Trial Finished: 
-Points: ${ this.scorePoints.toFixed() }
-                `;
                 this.announceText.setVisible( true );
                 this.announceText.setActive( true );
     
+                this.scoreStartTime = this.time.now;
                 setTimeout( () => {
                     this.nextPhase = MainScreenPhase.WAITING_FOR_TRIAL_START;
                 }, 10*1000 );
@@ -290,7 +297,7 @@ Points: ${ this.scorePoints.toFixed() }
 
                                     this.scorePoints = this.scorePoints + target.getPoints();
                                     console.log( `scorePoints: ${this.scorePoints} scale ${target.scale}` );
-                                    this.scoreText.text = `Score: ${this.scorePoints.toFixed()}`;
+                                    this.scoreText.text = `User: ${this.registry.get('userName')}, Level: ${this.currentLevel.toFixed()} Score: ${this.scorePoints.toFixed()}`;
                                     target.disableTarget( );
                                 }
                             }
@@ -305,13 +312,33 @@ Points: ${ this.scorePoints.toFixed() }
                         let cnt = this.cleanUpTargets( );
                         //this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
                         if ( cnt === 0 ) {
-                            this.createTargets(3);
+                            this.createTargets(3, 3);
+                            for( let t of this.targets ) {
+                                if ( t.points >  0 ) {
+                                    this.trialMaxScore = this.trialMaxScore + t.points;
+                                }
+                            }
                             this.startTargets();
                         }
                     });
                 }
             }    
         } else if ( this.currentPhase === MainScreenPhase.TRIAL_DONE ) {
+            let perc = this.scorePoints > 0 ? ( this.scorePoints / this.trialMaxScore ) : 0;
+            let levelUp = "";
+
+            if ( perc > 0.75) {
+                this.currentLevel = this.currentLevel + 1;
+                levelUp = "Level Up: ${this.currentLevel}"
+            }
+            this.announceText.text = `Trial Finished: 
+Points: ${ this.scorePoints.toFixed() }, ${ (perc * 100).toFixed() }%  
+
+${levelUp}
+
+Continuing in ${ (10 - ( this.time.now - this.scoreStartTime ) / 1000 ).toFixed() }
+`;
+            
         }
         this.prevPhase = this.currentPhase;
     }
@@ -328,14 +355,52 @@ Points: ${ this.scorePoints.toFixed() }
         return cnt;
     }
 
-    createTargets( numTargets : number ) {
-        this.targets = new Array<JBTarget>();
+    trialMaxScore : number;
 
-        for( let i = 0; i < numTargets; i++ ) {
-            let t = ( Math.random() > 0.25 ) ? new JBStar( this, this.jbPoseDetection ) : new JBBomb( this, this.jbPoseDetection );
-            t.setRandomPosition();
+    createTargets( numStars : number, numBombs : number ) {
+        this.targets = new Array<JBTarget>();
+        let fnd = false;
+
+        for( let i = 0; i < numStars; i++ ) {
+            let t : JBTarget = null;
+            fnd = false;
+            for( let j = 0; j < 50; j++ ) {
+                t = new JBStar( this, this.jbPoseDetection );
+                t.setRandomPosition();
+                const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], t.x, t.y );
+                
+                let thresh = t.oScale * Math.max( t.width, t.height );
+                if ( ( min >= 0 ) && ( min >  1.0 * thresh ) ) {
+                    fnd = true;
+                    break;
+                }   
+            }            
+            if ( ! fnd ) {
+                console.log("giving up to find target away from pose detection");
+            }
             this.targets.push( t );
         }
+
+        for( let i = 0; i < numBombs; i++ ) {
+            let t : JBTarget = null;
+            fnd = false;
+            for( let j = 0; j < 50; j++ ) {
+                t = new JBBomb( this, this.jbPoseDetection );
+                t.setRandomPosition();
+                const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], t.x, t.y );
+                
+                let thresh = t.oScale * Math.max( t.width, t.height );
+                if ( ( min >= 0 ) && ( min >  1.0 * thresh ) ) {
+                    fnd = true;
+                    break;
+                }   
+            }            
+            if ( ! fnd ) {
+                console.log("giving up to find bomb away from pose detection");
+            }
+            this.targets.push( t );
+        }
+
         //this.startTargets();
     }
 
@@ -348,8 +413,9 @@ Points: ${ this.scorePoints.toFixed() }
     startTargets( ) {
         for( let t of this.targets ) {
             console.log(`start target ${t.x}, ${t.y}`);
-            
-            t.start( 1000 );
+            let dur = this.currentLevel % 10;
+
+            t.start( 2500 - dur * 150 );
         }
     } 
 

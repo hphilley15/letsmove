@@ -15,7 +15,7 @@ class JBTarget extends Phaser.GameObjects.Sprite {
 
     oScale : number;
 
-    constructor( scene : Phaser.Scene, private points: number, jbPoseDetection : JBPoseDetection, img: string  = 'target' ) {
+    constructor( scene : Phaser.Scene, public points: number, jbPoseDetection : JBPoseDetection, img: string  = 'target' ) {
         super( scene, -1000, -1000, img );
         
         this.mainScreen = scene as MainScreen;
