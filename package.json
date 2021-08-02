@@ -21,6 +21,7 @@
     "@types/node": "^15.14.2",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "copy-webpack-plugin": "^9.0.0",
+    "gh-pages": "^3.2.3",
     "ts-loader": "^9.2.3",
     "tslib": "^2.3.0",
     "typescript": "^4.3.5",
