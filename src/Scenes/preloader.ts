@@ -45,12 +45,10 @@ class PreLoader extends Phaser.Scene{
     private assetText : Phaser.GameObjects.Text = null;
 
     preload() {
-      this.load.image("logo", 'assets/images/ntnuerc-logo-1.png');
       this.load.audio("beep", 'assets/audio/beep_ping.wav');
       this.load.audio( "bomb", 'assets/audio/bomb.wav' );
       this.load.audio( "levelup", 'assets/audio/levelup.wav' );
 
-//      this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
       this.load.image( "target", 'assets/images/target.png' );
 
       this.load.image("logo", 'assets/images/ntnuerc-logo-1.png');
@@ -61,6 +59,8 @@ class PreLoader extends Phaser.Scene{
       this.load.audio("bg2", 'assets/audio/background2.wav');
       
       this.load.audio("bg3", 'assets/audio/background3.wav');
+
+      this.load.image("fira", 'assets/images/fira logo.png');
       
       var width = this.cameras.main.width;
       var height = this.cameras.main.height;

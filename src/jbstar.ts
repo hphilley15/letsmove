@@ -10,20 +10,39 @@ class JBStar extends JBTarget {
     }
 }
 
+class JBFIRA extends JBTarget {
+    constructor( scene : Phaser.Scene, jbPoseDetection : JBPoseDetection ) {
+        super( scene, +30, jbPoseDetection, 'fira' );
+    }
+}
+
 console.log("registering gameobjectfactory");
 
 Phaser.GameObjects.GameObjectFactory.register(
 	'jbstar',
 	function (this: Phaser.GameObjects.GameObjectFactory, points: number, jbPoseDetection : JBPoseDetection ) {
         console.log("gameobjectfactory called");
-		const jbstar = new JBTarget( this.scene, points, jbPoseDetection );
+		const jbt = new JBStar( this.scene, jbPoseDetection );
 
-        this.displayList.add( jbstar );
-        this.updateList.add( jbstar );
+        this.displayList.add( jbt );
+        this.updateList.add( jbt );
 
-        return jbstar;
+        return jbt;
 	}
 )
 
-export { JBStar };
+Phaser.GameObjects.GameObjectFactory.register(
+	'jbfira',
+	function (this: Phaser.GameObjects.GameObjectFactory, points: number, jbPoseDetection : JBPoseDetection ) {
+        console.log("gameobjectfactory called");
+		const jbt = new JBFIRA( this.scene, jbPoseDetection );
+
+        this.displayList.add( jbt );
+        this.updateList.add( jbt );
+
+        return jbt;
+	}
+)
+
+export { JBStar, JBFIRA };
 

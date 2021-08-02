@@ -6,7 +6,7 @@ import { JBPoseDetection } from "../jbposedetection";
 import { JBTarget } from '../jbtarget';
 import { isMobile } from '../utils';
 import { JBBomb } from '../jbbomb';
-import { JBStar } from '../jbstar';
+import { JBStar, JBFIRA } from '../jbstar';
 
 enum MainScreenPhase {
     WAITING_FOR_TRIAL_START,
@@ -43,6 +43,7 @@ class MainScreen extends Phaser.Scene
     }
 
     scorePoints: number;
+    totalPoints: number;
     currentLevel : number;
 
     scoreText : Phaser.GameObjects.Text = null;
@@ -73,24 +74,6 @@ class MainScreen extends Phaser.Scene
         this.sound.add( "bomb" );
 
         console.log( `bg sounds: ${this.backgrounds}`);
-
-        let rnd = ( Math.random() * ( this.backgrounds.length - 1 ) ).toFixed();
-        console.log( `bg sounds: ${this.backgrounds} rnd ${rnd}`);
-        let snd = this.backgrounds[rnd]
-
-        const sndConfig = {
-            mute: false,
-            volume: 1,
-            rate: 1,
-            detune: 0,
-            seek: 0,
-            loop: true,
-            delay: 0
-        };
-
-        console.log( `snd ${snd}, sndConfig ${sndConfig}` );
-        
-        this.bgSound = this.sound.add( snd, sndConfig );
 
         let width = this.cameras.main.width;
         let height = this.cameras.main.height;
@@ -169,8 +152,6 @@ class MainScreen extends Phaser.Scene
             });
             this.timeText.setOrigin(1, 0);
     
-            this.sound.play( snd, sndConfig );
-    
             //this.createTargets(3);
             
             this.logText = this.make.text( {
@@ -187,6 +168,8 @@ class MainScreen extends Phaser.Scene
             this.logText.setVisible( false );
             let logKey = this.input.keyboard.addKey('L');
             logKey.on( 'down', (event) => { if (this.logText.visible ) { this.logText.setVisible(false) } else { this.logText.setVisible( true ) } } );
+
+            this.totalPoints = 0;
         });
     }
 
@@ -230,6 +213,25 @@ Loading ...`;
                                     
                 this.trialStartTime = this.time.now;
 
+                let rnd = ( Math.random() * ( this.backgrounds.length - 1 ) ).toFixed();
+                console.log( `bg sounds: ${this.backgrounds} rnd ${rnd}`);
+                let snd = this.backgrounds[rnd]
+
+                const sndConfig = {
+                    mute: false,
+                    volume: 1,
+                    rate: 1,
+                    detune: 0,
+                    seek: 0,
+                    loop: true,
+                    delay: 0
+                };
+
+                console.log( `snd ${snd}, sndConfig ${sndConfig}` );
+                
+                this.bgSound = this.sound.add( snd, sndConfig );
+                this.bgSound.play();
+                
                 setTimeout( () => {
                     this.nextPhase = MainScreenPhase.TRIAL_DONE;
                 }, 30*1000 );
@@ -237,6 +239,8 @@ Loading ...`;
                 this.announceText.setVisible( true );
                 this.announceText.setActive( true );
     
+                this.bgSound.stop();
+
                 this.perc = this.scorePoints > 0 ? ( this.scorePoints / this.trialMaxScore ) : 0;
                 this.levelUp = `Reach ${Math.floor(0.75 * this.trialMaxScore)} points to level up `;
     
@@ -245,7 +249,7 @@ Loading ...`;
                     this.levelUp = `Level Up: ${(1+this.currentLevel).toFixed()}`;
                     this.sound.play("levelup");
                 }
-    
+                this.totalPoints = this.totalPoints + (this.currentLevel + 1) * this.scorePoints
                 this.scoreStartTime = this.time.now;
                 setTimeout( () => {
                     this.nextPhase = MainScreenPhase.WAITING_FOR_TRIAL_START;
@@ -312,7 +316,7 @@ Loading ...`;
 
                                     this.scorePoints = this.scorePoints + target.getPoints();
                                     console.log( `scorePoints: ${this.scorePoints} scale ${target.scale}` );
-                                    this.scoreText.text = `User: ${this.registry.get('userName')}, Level: ${(1+this.currentLevel).toFixed()} Score: ${this.scorePoints.toFixed()}`;
+                                    this.scoreText.text = `User: ${this.registry.get('userName')}, Level: ${(1+this.currentLevel).toFixed()} Score: ${this.scorePoints.toFixed()} Total: ${this.totalPoints.toFixed()}`;
                                     target.disableTarget( );
                                 }
                             }
@@ -376,7 +380,11 @@ Continuing in ${ (10 - ( this.time.now - this.scoreStartTime ) / 1000 ).toFixed(
             let t : JBTarget = null;
             fnd = false;
             for( let j = 0; j < 50; j++ ) {
-                t = new JBStar( this, this.jbPoseDetection );
+                if ( Math.random() < 0.1 ) {
+                    t = new JBFIRA( this, this.jbPoseDetection );
+                } else {
+                    t = new JBStar( this, this.jbPoseDetection );
+                }
                 t.setRandomPosition();
                 const { min, minIndex } = this.jbPoseDetection.calcMinDist( this.currentPoses[0], t.x, t.y );
                 
