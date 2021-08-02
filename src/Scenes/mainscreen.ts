@@ -39,6 +39,7 @@ class MainScreen extends Phaser.Scene
         this.backgrounds.push("bg3");
 
         this.load.audio( "bomb", 'assets/audio/bomb.wav' );
+        this.load.audio( "levelUp", 'assets/audio/levelup.wav' );
     }
 
     scorePoints: number;
@@ -147,7 +148,7 @@ class MainScreen extends Phaser.Scene
             this.scoreText = this.make.text({
                 x: 10,
                 y: 10,
-                text: `User: ${this.registry.get('userName')}, Level: ${this.currentLevel.toFixed()} Score: ${this.scorePoints.toFixed()}`,
+                text: `User: ${this.registry.get('userName')}, Level: ${(1+this.currentLevel).toFixed()} Score: ${this.scorePoints.toFixed()}`,
                 style: {
                     color: '#e0e030',
                     font: '32px monospace',
@@ -182,6 +183,8 @@ class MainScreen extends Phaser.Scene
                 }
             });
 
+            this.logText.setActive( false );
+            this.logText.setVisible( false );
             let logKey = this.input.keyboard.addKey('L');
             logKey.on( 'down', (event) => { if (this.logText.visible ) { this.logText.setVisible(false) } else { this.logText.setVisible( true ) } } );
         });
@@ -197,6 +200,9 @@ class MainScreen extends Phaser.Scene
     prevPhase : MainScreenPhase;
     currentPhase : MainScreenPhase;
     nextPhase: MainScreenPhase;
+
+    perc : number;
+    levelUp : string;
 
     update( time : number, delta : number ) {
         this.currentPhase = this.nextPhase;
@@ -220,7 +226,7 @@ Loading ...`;
 
                 this.scorePoints = 0;
                 this.trialMaxScore = 0;
-                this.scoreText.text = `User: ${this.registry.get('userName')}, Level: ${this.currentLevel.toFixed()} Score: ${this.scorePoints.toFixed()}`;
+                this.scoreText.text = `User: ${this.registry.get('userName')}, Level: ${(1+this.currentLevel).toFixed()} Score: ${this.scorePoints.toFixed()}`;
                                     
                 this.trialStartTime = this.time.now;
 
@@ -230,6 +236,15 @@ Loading ...`;
             } else if ( this.currentPhase === MainScreenPhase.TRIAL_DONE ) {
                 this.announceText.setVisible( true );
                 this.announceText.setActive( true );
+    
+                this.perc = this.scorePoints > 0 ? ( this.scorePoints / this.trialMaxScore ) : 0;
+                this.levelUp = `Reach ${Math.floor(0.75 * this.trialMaxScore)} points to level up `;
+    
+                if ( this.perc > 0.75 ) {
+                    this.currentLevel = this.currentLevel + 1;
+                    this.levelUp = `Level Up: ${(1+this.currentLevel).toFixed()}`;
+                    this.sound.play("levelup");
+                }
     
                 this.scoreStartTime = this.time.now;
                 setTimeout( () => {
@@ -297,7 +312,7 @@ Loading ...`;
 
                                     this.scorePoints = this.scorePoints + target.getPoints();
                                     console.log( `scorePoints: ${this.scorePoints} scale ${target.scale}` );
-                                    this.scoreText.text = `User: ${this.registry.get('userName')}, Level: ${this.currentLevel.toFixed()} Score: ${this.scorePoints.toFixed()}`;
+                                    this.scoreText.text = `User: ${this.registry.get('userName')}, Level: ${(1+this.currentLevel).toFixed()} Score: ${this.scorePoints.toFixed()}`;
                                     target.disableTarget( );
                                 }
                             }
@@ -312,33 +327,29 @@ Loading ...`;
                         let cnt = this.cleanUpTargets( );
                         //this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
                         if ( cnt === 0 ) {
-                            this.createTargets(3, 3);
-                            for( let t of this.targets ) {
-                                if ( t.points >  0 ) {
-                                    this.trialMaxScore = this.trialMaxScore + t.points;
-                                }
-                            }
+                            let nTargets = Math.floor(this.currentLevel / 10);
+                            let nBombs = Math.floor(this.currentLevel / 50);
+
+                            this.createTargets( 1 + nTargets, nBombs );
+                            this.trialMaxScore = 5 * 30/(2.5 - (this.currentLevel % 10)*0.15);
+                            // for( let t of this.targets ) {
+                            //     if ( t.points >  0 ) {
+                            //         this.trialMaxScore = this.trialMaxScore + t.points;
+                            //     }
+                            // }
                             this.startTargets();
                         }
                     });
                 }
             }    
         } else if ( this.currentPhase === MainScreenPhase.TRIAL_DONE ) {
-            let perc = this.scorePoints > 0 ? ( this.scorePoints / this.trialMaxScore ) : 0;
-            let levelUp = "";
-
-            if ( perc > 0.75) {
-                this.currentLevel = this.currentLevel + 1;
-                levelUp = "Level Up: ${this.currentLevel}"
-            }
             this.announceText.text = `Trial Finished: 
-Points: ${ this.scorePoints.toFixed() }, ${ (perc * 100).toFixed() }%  
+Points: ${ Math.round(this.scorePoints) }  
 
-${levelUp}
+${this.levelUp}
 
 Continuing in ${ (10 - ( this.time.now - this.scoreStartTime ) / 1000 ).toFixed() }
 `;
-            
         }
         this.prevPhase = this.currentPhase;
     }

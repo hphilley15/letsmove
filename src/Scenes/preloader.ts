@@ -47,6 +47,8 @@ class PreLoader extends Phaser.Scene{
     preload() {
       this.load.image("logo", 'assets/images/ntnuerc-logo-1.png');
       this.load.audio("beep", 'assets/audio/beep_ping.wav');
+      this.load.audio( "bomb", 'assets/audio/bomb.wav' );
+      this.load.audio( "levelup", 'assets/audio/levelup.wav' );
 
 //      this.load.image("logo", 'assets/images/ntnuerc-logo-1.png'); 
       this.load.image( "target", 'assets/images/target.png' );
