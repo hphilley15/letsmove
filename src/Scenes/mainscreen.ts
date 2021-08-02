@@ -331,11 +331,11 @@ Loading ...`;
                         let cnt = this.cleanUpTargets( );
                         //this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
                         if ( cnt === 0 ) {
-                            let nTargets = Math.floor(this.currentLevel / 5) % 5;
-                            let nBombs = Math.floor(this.currentLevel / 25);
+                            let nTargets = Math.floor(this.currentLevel / 3) % 5;
+                            let nBombs = Math.floor(this.currentLevel / 15);
 
                             this.createTargets( 1 + nTargets, nBombs );
-                            this.trialMaxScore = 5 * 30/(2.5 - (this.currentLevel % 5)*0.30);
+                            this.trialMaxScore = 5 * 30/(2.5 - (this.currentLevel % 3)*0.50);
                             // for( let t of this.targets ) {
                             //     if ( t.points >  0 ) {
                             //         this.trialMaxScore = this.trialMaxScore + t.points;
@@ -380,7 +380,7 @@ Continuing in ${ (10 - ( this.time.now - this.scoreStartTime ) / 1000 ).toFixed(
             let t : JBTarget = null;
             fnd = false;
             for( let j = 0; j < 50; j++ ) {
-                if ( Math.random() < 0.1 ) {
+                if ( Math.random() < 0.2 ) {
                     t = new JBFIRA( this, this.jbPoseDetection );
                 } else {
                     t = new JBStar( this, this.jbPoseDetection );
@@ -432,9 +432,9 @@ Continuing in ${ (10 - ( this.time.now - this.scoreStartTime ) / 1000 ).toFixed(
     startTargets( ) {
         for( let t of this.targets ) {
             console.log(`start target ${t.x}, ${t.y}`);
-            let dur = this.currentLevel % 5;
+            let dur = this.currentLevel % 3;
 
-            t.start( 2500 - dur * 300 );
+            t.start( 2500 - dur * 500 );
         }
     } 
 
