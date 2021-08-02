@@ -327,11 +327,11 @@ Loading ...`;
                         let cnt = this.cleanUpTargets( );
                         //this.targets = this.targets.filter( (target : JBTarget, index : number, array: JBTarget[] ) => { return target.active } );
                         if ( cnt === 0 ) {
-                            let nTargets = Math.floor(this.currentLevel / 10);
-                            let nBombs = Math.floor(this.currentLevel / 50);
+                            let nTargets = Math.floor(this.currentLevel / 5) % 5;
+                            let nBombs = Math.floor(this.currentLevel / 25);
 
                             this.createTargets( 1 + nTargets, nBombs );
-                            this.trialMaxScore = 5 * 30/(2.5 - (this.currentLevel % 10)*0.15);
+                            this.trialMaxScore = 5 * 30/(2.5 - (this.currentLevel % 5)*0.30);
                             // for( let t of this.targets ) {
                             //     if ( t.points >  0 ) {
                             //         this.trialMaxScore = this.trialMaxScore + t.points;
@@ -424,9 +424,9 @@ Continuing in ${ (10 - ( this.time.now - this.scoreStartTime ) / 1000 ).toFixed(
     startTargets( ) {
         for( let t of this.targets ) {
             console.log(`start target ${t.x}, ${t.y}`);
-            let dur = this.currentLevel % 10;
+            let dur = this.currentLevel % 5;
 
-            t.start( 2500 - dur * 150 );
+            t.start( 2500 - dur * 300 );
         }
     } 
 
