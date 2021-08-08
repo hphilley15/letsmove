@@ -91,8 +91,8 @@ class MainScreen extends Phaser.Scene
         let fontSpec = fontSize.toFixed() + "px Courier";
   
         this.announceText = this.make.text( {
-            x : 0.5 * vw, 
-            y : 0.5 * vh,
+            x : 0 * vw, 
+            y : 0.4 * vh,
             text: `Announcement: Loading ...
             `,
             style: {
@@ -101,7 +101,7 @@ class MainScreen extends Phaser.Scene
             } 
         });
 
-        this.announceText.setOrigin( 0.5, 0.5 );
+        this.announceText.setOrigin( 0.0, 0.0 );
         this.announceText.setDepth(10);
 
         this.currentPhase = MainScreenPhase.WAITING_FOR_TRIAL_START;
@@ -202,7 +202,7 @@ class MainScreen extends Phaser.Scene
             if ( this.currentPhase === MainScreenPhase.WAITING_FOR_TRIAL_START ) {
                 this.announceText.text = `
 1.) Step 3 m - 5 m  away from the camera.
-2.) Make sure that the camera can detect your arms and legs.
+2.) Camera can see your arms and legs.
 3.) Touch the stars and avoid the bombs
 
 Loading ...`;
