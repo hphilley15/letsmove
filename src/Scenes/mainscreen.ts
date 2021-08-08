@@ -87,7 +87,7 @@ class MainScreen extends Phaser.Scene
         let tWidth = window.innerWidth;
         let tHeight = window.innerHeight;
 
-        let fontSize = tWidth / 20;
+        let fontSize = tWidth / 25;
         let fontSpec = fontSize.toFixed() + "px Courier";
   
         this.announceText = this.make.text( {
@@ -140,7 +140,7 @@ class MainScreen extends Phaser.Scene
                 text: `User: ${this.registry.get('userName')}, Level: ${(1+this.currentLevel).toFixed()} Score: ${this.scorePoints.toFixed()}`,
                 style: {
                     color: '#e0e030',
-                    font: '32px monospace',
+                    font: fontSpec,
                 }
             });
             this.scoreText.setOrigin(0, 0);
@@ -153,7 +153,7 @@ class MainScreen extends Phaser.Scene
                 text: `Time: ${this.currentTime.toFixed()}`,
                 style: {
                     color: '#e0e030',
-                    font: '32px monospace',
+                    font: fontSpec,
                 }
             });
             this.timeText.setOrigin(1, 0);

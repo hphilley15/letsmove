@@ -46,7 +46,8 @@ class LoginScreen extends Phaser.Scene{
       bar.fillStyle(0x303030, 1.0);
       bar.fillRect(0.0*tWidth, 0.5*tHeight+50, tWidth, 50);
 
-      this.textEntry = this.add.text(0.0*tWidth, 0.5*tHeight+50, this.createRandomName(), { font: fontSpec, backgroundColor: '#303030' } );
+      this.textEntry = this.add.text(0.0*tWidth, 0.5*tHeight+50, this.createRandomName(), { font: fontSpec, backgroundColor: '#303030' } )
+        .setInteractive();
   
       this.input.keyboard.on('keydown', (event) => {
           console.log( `event.keyCode ${event.keyCode}`);
