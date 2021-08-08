@@ -36,13 +36,16 @@ class LoginScreen extends Phaser.Scene{
         loop: -1
       });
 
-      this.add.text(0.01*tWidth, 0.5*tHeight, 'Enter your name:', { font: '48px Courier', backgroundColor : '#303030' } );
+      let fontSize = tWidth / 5;
+      let fontSpec = fontSize.toFixed + "px Courier";
+
+      this.add.text(0.0*tWidth, 0.5*tHeight, 'Enter your name:', { font: fontSpec, backgroundColor : '#303030' } );
 
       let bar = this.add.graphics();
       bar.fillStyle(0x303030, 1.0);
-      bar.fillRect(0.01*tWidth, 0.5*tHeight+50, tWidth, 50);
+      bar.fillRect(0.0*tWidth, 0.5*tHeight+50, tWidth, 50);
 
-      this.textEntry = this.add.text(0.01*tWidth, 0.5*tHeight+50, this.createRandomName(), { font: '48px Courier', backgroundColor: '#303030' } );
+      this.textEntry = this.add.text(0.0*tWidth, 0.5*tHeight+50, this.createRandomName(), { font: fontSpec, backgroundColor: '#303030' } );
   
       this.input.keyboard.on('keydown', (event) => {
           console.log( `event.keyCode ${event.keyCode}`);
@@ -56,7 +59,7 @@ class LoginScreen extends Phaser.Scene{
           }
       });
   
-      this.button = this.add.text( 0.01*tWidth, 0.9*tHeight, "Done", { font: '48px Courier', backgroundColor: '#D9E23D' } )
+      this.button = this.add.text( 0.0*tWidth, 0.8*tHeight, "Done", { font: fontSpec, backgroundColor: '#D9E23D' } )
         .setInteractive()
         .on('pointerdown', () => this.nextScreen( ) );
     }
