@@ -36,9 +36,10 @@ class LoginScreen extends Phaser.Scene{
         loop: -1
       });
 
-      let fontSize = tWidth / 5;
-      let fontSpec = fontSize.toFixed + "px Courier";
+      let fontSize = tWidth / 20;
+      let fontSpec = fontSize.toFixed() + "px Courier";
 
+      console.log( `fontSpec: ${fontSpec}`);
       this.add.text(0.0*tWidth, 0.5*tHeight, 'Enter your name:', { font: fontSpec, backgroundColor : '#303030' } );
 
       let bar = this.add.graphics();

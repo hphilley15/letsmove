@@ -84,6 +84,12 @@ class MainScreen extends Phaser.Scene
         let vw = window.innerWidth;
         let vh = window.innerHeight;
 
+        let tWidth = window.innerWidth;
+        let tHeight = window.innerHeight;
+
+        let fontSize = tWidth / 20;
+        let fontSpec = fontSize.toFixed() + "px Courier";
+  
         this.announceText = this.make.text( {
             x : 0.5 * vw, 
             y : 0.5 * vh,
@@ -91,7 +97,7 @@ class MainScreen extends Phaser.Scene
             `,
             style: {
                 color: 'white',
-                font: '32px monospace',
+                font: fontSpec,
             } 
         });
 
