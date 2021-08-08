@@ -12,7 +12,7 @@ class PreLoader extends Phaser.Scene{
        
        this.load.on('progress', (value) => {
         console.log(`progress ${value}`);
-        this.percentText.setText( (value * 100).toString() + '%');
+        this.percentText.setText( (value * 100).toFixed() + '%');
         
         this.progressBar = this.add.graphics();
         
