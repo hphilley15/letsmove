@@ -87,7 +87,7 @@ class MainScreen extends Phaser.Scene
         let tWidth = window.innerWidth;
         let tHeight = window.innerHeight;
 
-        let fontSize = tWidth / 25;
+        let fontSize = tWidth / 30;
         let fontSpec = fontSize.toFixed() + "px Courier";
   
         this.announceText = this.make.text( {
@@ -135,8 +135,8 @@ class MainScreen extends Phaser.Scene
             this.currentLevel = 0;
 
             this.scoreText = this.make.text({
-                x: 10,
-                y: 10,
+                x: 0,
+                y: 0,
                 text: `User: ${this.registry.get('userName')}, Level: ${(1+this.currentLevel).toFixed()} Score: ${this.scorePoints.toFixed()}`,
                 style: {
                     color: '#e0e030',
@@ -149,7 +149,7 @@ class MainScreen extends Phaser.Scene
 
             this.timeText = this.make.text({
                 x: this.game.canvas.width,
-                y: 10, 
+                y: 0, 
                 text: `Time: ${this.currentTime.toFixed()}`,
                 style: {
                     color: '#e0e030',
