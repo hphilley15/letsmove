@@ -7,6 +7,14 @@ import { JBTarget } from './jbtarget';
 class JBStar extends JBTarget {
     constructor( scene : Phaser.Scene, jbPoseDetection : JBPoseDetection ) {
         super( scene, +10, jbPoseDetection, 'star' );
+
+        let fNames = this.anims.generateFrameNames( 'atlas', {
+            start: 1, end: 4,
+            prefix: 'star-'
+        });
+        console.log( `frameNames ${fNames}`);
+
+        this.anims.create( { key: 'star', frames: fNames, frameRate: 10, repeat: -1 } );
     }
 }
 

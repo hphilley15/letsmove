@@ -29,7 +29,8 @@ class MainScreen extends Phaser.Scene
     backgrounds = Array<string>();
 
     preload() {        
-        this.load.image("star", 'assets/images/star.png');
+        //this.load.image("star", 'assets/images/star.png');
+        this.load.atlas( 'atlas', 'assets/images/atlas.json', 'assets/images');
         this.load.image("bomb", 'assets/images/bomb.png');
 
         this.backgrounds.push("bg1");
