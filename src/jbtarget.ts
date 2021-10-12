@@ -27,7 +27,7 @@ class JBTarget extends Phaser.GameObjects.Sprite {
 
         this.oScale = (window.innerWidth * 0.1) / this.width;
 
-        this.scale = this.oScale; 
+        this.setScale( this.oScale ); 
         //console.log(`this.target ${this.target}`);
     }
 
@@ -62,7 +62,7 @@ class JBTarget extends Phaser.GameObjects.Sprite {
 
         this.setActive( true );
         this.setVisible( true );
-
+        //this.setScale(0.3);
         this.scene.add.existing( this );
     }
 

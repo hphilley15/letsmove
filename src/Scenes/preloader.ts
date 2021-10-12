@@ -62,6 +62,22 @@ class PreLoader extends Phaser.Scene{
 
       this.load.image("fira", 'assets/images/fira logo.png');
       
+      this.load.atlas( 'atlas', 'assets/images/atlas.png', 'assets/images/atlas.json',  );
+      this.load.image("bomb", 'assets/images/bomb.png');
+
+      let backgrounds = Array<String>();
+
+      backgrounds.push("bg1");
+      
+      backgrounds.push("bg2");
+      
+      backgrounds.push("bg3");
+
+      this.registry.set('bg_melodies', backgrounds );
+      
+      this.load.audio( "bomb", 'assets/audio/bomb.wav' );
+      this.load.audio( "levelUp", 'assets/audio/levelup.wav' );
+      
       var width = this.cameras.main.width;
       var height = this.cameras.main.height;
       this.loadingText = this.make.text({

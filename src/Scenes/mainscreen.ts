@@ -26,21 +26,12 @@ class MainScreen extends Phaser.Scene
         super('main_screen');
     }
 
-    backgrounds = Array<string>();
-
     preload() {        
         //this.load.image("star", 'assets/images/star.png');
-        this.load.atlas( 'atlas', 'assets/images/atlas.json', 'assets/images');
-        this.load.image("bomb", 'assets/images/bomb.png');
+        let atlasTexture = this.textures.get('atlas');
 
-        this.backgrounds.push("bg1");
-        
-        this.backgrounds.push("bg2");
-        
-        this.backgrounds.push("bg3");
-
-        this.load.audio( "bomb", 'assets/audio/bomb.wav' );
-        this.load.audio( "levelUp", 'assets/audio/levelup.wav' );
+        let frames = atlasTexture.getFrameNames();
+        console.log(`frames ${frames}`);
     }
 
     scorePoints: number;
@@ -74,7 +65,8 @@ class MainScreen extends Phaser.Scene
         this.sound.add( "beep" );
         this.sound.add( "bomb" );
 
-        console.log( `bg sounds: ${this.backgrounds}`);
+        let bg = this.game.registry.get( 'bg_melodies' );
+        console.log( `bg sounds: ${bg}`);
 
         let width = this.cameras.main.width;
         let height = this.cameras.main.height;
@@ -220,9 +212,11 @@ Loading ...`;
                                     
                 this.trialStartTime = this.time.now;
 
-                let rnd = ( Math.random() * ( this.backgrounds.length - 1 ) ).toFixed();
-                console.log( `bg sounds: ${this.backgrounds} rnd ${rnd}`);
-                let snd = this.backgrounds[rnd]
+                let bg = this.game.registry.get( 'bg_melodies' );
+
+                let rnd = ( Math.random() * ( bg.length - 1 ) ).toFixed();
+                console.log( `bg sounds: ${bg} rnd ${rnd}`);
+                let snd = bg[rnd];
 
                 const sndConfig = {
                     mute: false,
